@@ -1,0 +1,102 @@
+{
+  "templates": [
+    {
+      "templateName": "entity.ftl",
+      "outputPathPattern": "generated/${packageName}/entity/${entityName}Entity.java",
+      "dataModelKey": "jpa",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "dto.ftl",
+      "outputPathPattern": "generated/${packageName}/dto/${entityName}DTO.java",
+      "dataModelKey": "dto",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "domain.ftl",
+      "outputPathPattern": "generated/${packageName}/domain/${entityName}Domain.java",
+      "dataModelKey": "domain",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "converter-domain-dto.ftl",
+      "outputPathPattern": "generated/${packageName}/dto/${entityName}DomainToDTO.java",
+      "dataModelKey": "domain",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "converter-dto-domain.ftl",
+      "outputPathPattern": "generated/${packageName}/dto/${entityName}DTOToDomain.java",
+      "dataModelKey": "dto",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "converter-domain-jpa.ftl",
+      "outputPathPattern": "generated/${packageName}/entity/${entityName}DomainToJPA.java",
+      "dataModelKey": "domain",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "converter-jpa-domain.ftl",
+      "outputPathPattern": "generated/${packageName}/entity/${entityName}JPAToDomain.java",
+      "dataModelKey": "jpa",
+      "additionalData": {
+        "author": "Alexandre M S Lima",
+        "date": "2024-10-26"
+      }
+    },
+    {
+      "templateName": "repository.ftl",
+      "outputPathPattern": "generated/${packageName}/repositories/${entityName}Repository.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "repository_port.ftl",
+      "outputPathPattern": "generated/${packageName}/repositories/${entityName}RepositoryPort.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "repository_adapter.ftl",
+      "outputPathPattern": "generated/${packageName}/repositories/${entityName}RepositoryAdapter.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "service.ftl",
+      "outputPathPattern": "generated/${packageName}/services/${entityName}Service.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "service_port.ftl",
+      "outputPathPattern": "generated/${packageName}/services/${entityName}ServicePort.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "service_adapter.ftl",
+      "outputPathPattern": "generated/${packageName}/services/${entityName}ServiceAdapter.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "controller.ftl",
+      "outputPathPattern": "generated/${packageName}/controllers/${entityName}Controller.java",
+      "dataModelKey": "dto"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "packageName": "br.com.myapp",
+  "entityName": "Produto",
+  "domainDescriptor": {
+    "attributes": [
+      { "name": "id", "type": "Long", "primaryKey": true },
+      { "name": "nome", "type": "String", "required": true, "maxLength": 100 },
+      { "name": "descricao", "type": "String" },
+      { "name": "preco", "type": "Double" }
+    ]
+  },
+  "dtoDescriptor": {
+    "attributes": [
+      { "name": "id", "type": "Long" },
+      { "name": "nome", "type": "String", "required": true, "maxLength": 100 },
+      { "name": "preco", "type": "Double" }
+    ]
+  },
+  "jpaDescriptor": {
+    "tableName": "produtos",
+    "attributes": [
+      { "name": "id", "type": "Long", "primaryKey": true, "generatedValue": true },
+      { "name": "nome", "type": "String", "columnDefinition": "VARCHAR(100)", "required": true},
+      { "name": "descricao", "type": "String", "required": true },
+      { "name": "preco", "type": "Double", "required": true }
+    ]
+  }
+}
