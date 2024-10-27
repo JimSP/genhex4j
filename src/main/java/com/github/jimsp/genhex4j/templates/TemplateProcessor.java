@@ -18,8 +18,10 @@ import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class TemplateProcessor {
 
 	private final Configuration freemarkerConfig;
@@ -113,6 +115,7 @@ public class TemplateProcessor {
 		try (final FileWriter writer = new FileWriter(outputFile)) {
 			final Template template = freemarkerConfig.getTemplate(templateName);
 			template.process(dataModel, writer);
+			log.info("create {} with template {}", outputFileName, templateName);
 		}
 	}
 }

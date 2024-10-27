@@ -2,7 +2,7 @@
   "templates": [
     {
       "templateName": "entity.ftl",
-      "outputPathPattern": "generated/${packageName}/entity/${entityName}Entity.java",
+      "outputPathPattern": "generated/src/${packageName}/entity/${entityName}Entity.java",
       "dataModelKey": "jpa",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -11,7 +11,7 @@
     },
     {
       "templateName": "dto.ftl",
-      "outputPathPattern": "generated/${packageName}/dto/${entityName}DTO.java",
+      "outputPathPattern": "generated/src/${packageName}/dto/${entityName}DTO.java",
       "dataModelKey": "dto",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -20,7 +20,7 @@
     },
     {
       "templateName": "domain.ftl",
-      "outputPathPattern": "generated/${packageName}/domain/${entityName}Domain.java",
+      "outputPathPattern": "generated/src/${packageName}/domain/${entityName}Domain.java",
       "dataModelKey": "domain",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -29,7 +29,7 @@
     },
     {
       "templateName": "converter-domain-dto.ftl",
-      "outputPathPattern": "generated/${packageName}/dto/${entityName}DomainToDTO.java",
+      "outputPathPattern": "generated/src/${packageName}/dto/${entityName}DomainToDTO.java",
       "dataModelKey": "domain",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -38,7 +38,7 @@
     },
     {
       "templateName": "converter-dto-domain.ftl",
-      "outputPathPattern": "generated/${packageName}/dto/${entityName}DTOToDomain.java",
+      "outputPathPattern": "generated/src/${packageName}/dto/${entityName}DTOToDomain.java",
       "dataModelKey": "dto",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -47,7 +47,7 @@
     },
     {
       "templateName": "converter-domain-jpa.ftl",
-      "outputPathPattern": "generated/${packageName}/entity/${entityName}DomainToJPA.java",
+      "outputPathPattern": "generated/src/${packageName}/entity/${entityName}DomainToJPA.java",
       "dataModelKey": "domain",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -56,7 +56,7 @@
     },
     {
       "templateName": "converter-jpa-domain.ftl",
-      "outputPathPattern": "generated/${packageName}/entity/${entityName}JPAToDomain.java",
+      "outputPathPattern": "generated/src/${packageName}/entity/${entityName}JPAToDomain.java",
       "dataModelKey": "jpa",
       "additionalData": {
         "author": "Alexandre M S Lima",
@@ -65,38 +65,88 @@
     },
     {
       "templateName": "repository.ftl",
-      "outputPathPattern": "generated/${packageName}/repositories/${entityName}Repository.java",
+      "outputPathPattern": "generated/src/${packageName}/repositories/${entityName}Repository.java",
       "dataModelKey": "jpa"
     },
     {
       "templateName": "repository_port.ftl",
-      "outputPathPattern": "generated/${packageName}/repositories/${entityName}RepositoryPort.java",
+      "outputPathPattern": "generated/src/${packageName}/repositories/${entityName}RepositoryPort.java",
       "dataModelKey": "jpa"
     },
     {
       "templateName": "repository_adapter.ftl",
-      "outputPathPattern": "generated/${packageName}/repositories/${entityName}RepositoryAdapter.java",
+      "outputPathPattern": "generated/src/${packageName}/repositories/${entityName}RepositoryAdapter.java",
       "dataModelKey": "jpa"
     },
     {
       "templateName": "service.ftl",
-      "outputPathPattern": "generated/${packageName}/services/${entityName}Service.java",
+      "outputPathPattern": "generated/src/${packageName}/services/${entityName}Service.java",
       "dataModelKey": "domain"
     },
     {
       "templateName": "service_port.ftl",
-      "outputPathPattern": "generated/${packageName}/services/${entityName}ServicePort.java",
+      "outputPathPattern": "generated/src/${packageName}/services/${entityName}ServicePort.java",
       "dataModelKey": "domain"
     },
     {
       "templateName": "service_adapter.ftl",
-      "outputPathPattern": "generated/${packageName}/services/${entityName}ServiceAdapter.java",
+      "outputPathPattern": "generated/src/${packageName}/services/${entityName}ServiceAdapter.java",
       "dataModelKey": "domain"
     },
     {
       "templateName": "controller.ftl",
-      "outputPathPattern": "generated/${packageName}/controllers/${entityName}Controller.java",
+      "outputPathPattern": "generated/src/${packageName}/controllers/${entityName}Controller.java",
       "dataModelKey": "dto"
+    },
+    {
+      "templateName": "dto_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/dto/${entityName}DTOTest.java",
+      "dataModelKey": "dto"
+    },
+    {
+      "templateName": "domain_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/domain/${entityName}DomainTest.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "entity_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/entity/${entityName}EntityTest.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "converter_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/converter/${entityName}ConverterTest.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "controller_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/controller/${entityName}ControllerTest.java",
+      "dataModelKey": "dto"
+    },
+    {
+      "templateName": "service_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/service/${entityName}ServiceTest.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "repository_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/repository/${entityName}RepositoryTest.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "service_adapter_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/services/${entityName}ServiceAdapterTest.java",
+      "dataModelKey": "domain"
+    },
+    {
+      "templateName": "repository_adapter_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/repositories/${entityName}RepositoryAdapterTest.java",
+      "dataModelKey": "jpa"
+    },
+    {
+      "templateName": "integration_test.ftl",
+      "outputPathPattern": "generated/test/${packageName}/${entityName}EndToEndTest.java",
+      "dataModelKey": "domain"
     }
   ]
 }
