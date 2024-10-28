@@ -3,8 +3,8 @@
   "entityName": "Produto",
   "domainDescriptor": {
     "attributes": [
-      { "name": "id", "type": "Long", "primaryKey": true },
-      { "name": "nome", "type": "String", "required": true, "maxLength": 100 },
+      { "name": "id", "type": "Long" },
+      { "name": "nome", "type": "String" },
       { "name": "descricao", "type": "String" },
       { "name": "preco", "type": "Double" }
     ]
@@ -13,6 +13,7 @@
     "attributes": [
       { "name": "id", "type": "Long" },
       { "name": "nome", "type": "String", "required": true, "maxLength": 100 },
+      { "name": "descricao", "type": "String", "required": true },
       { "name": "preco", "type": "Double" }
     ]
   },

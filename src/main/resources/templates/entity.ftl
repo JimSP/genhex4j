@@ -1,9 +1,16 @@
 package ${packageName}.entity;
 
 import lombok.Data;
-import javax.persistence.*;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import jakarta.persistence.*;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 <#if jpaDescriptor?? && jpaDescriptor.tableName??>
 @Table(name = "${jpaDescriptor.tableName}")

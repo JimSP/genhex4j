@@ -66,28 +66,20 @@ public class TemplateProcessor {
 
 		return outputPath;
 	}
+	
 
 	private Map<String, Object> prepareDataModel(final TemplateDescriptor templateDesc,
 			final EntityDescriptor entityDescriptor) {
-		
-		
+
 		final Map<String, Object> dataModel = new HashMap<>();
-		dataModel.put("packageName", entityDescriptor.getPackageName());
-		dataModel.put("entityName", entityDescriptor.getEntityName());
-
-		if (entityDescriptor.getDomainDescriptor() != null) {
-		    dataModel.put("domainDescriptor", entityDescriptor.getDomainDescriptor());
-		}
-		
-		if (entityDescriptor.getDtoDescriptor() != null) {
-		    dataModel.put("dtoDescriptor", entityDescriptor.getDtoDescriptor());
-		}
-		
-		if (entityDescriptor.getJpaDescriptor() != null) {
-		    dataModel.put("jpaDescriptor", entityDescriptor.getJpaDescriptor());
-		}
-
-
+	    if (templateDesc.getAdditionalData() != null) {
+	        dataModel.putAll(templateDesc.getAdditionalData());
+	    }
+	    
+	    dataModel.putAll(entityDescriptorToMap(entityDescriptor));
+	    
+	    replacePlaceholders(dataModel);
+	    
 		final AttributeType attributeType = AttributeType.valueOf(templateDesc.getDataModelKey().toUpperCase());
 		final List<AttributeDescriptor> attributes = entityDescriptor.getAttributesByKey(attributeType);
 		dataModel.put("attributes", attributes);
@@ -99,6 +91,8 @@ public class TemplateProcessor {
 		return dataModel;
 	}
 
+	
+	
 	@SneakyThrows
 	public void generateFileFromTemplate(final String templateName, final Map<String, Object> dataModel,
 			final String outputFileName) {
@@ -118,4 +112,28 @@ public class TemplateProcessor {
 			log.info("create {} with template {}", outputFileName, templateName);
 		}
 	}
+
+	private Map<String, Object> entityDescriptorToMap(EntityDescriptor entityDescriptor) {
+		final Map<String, Object> map = new HashMap<>();
+	    map.put("packageName", entityDescriptor.getPackageName());
+	    map.put("entityName", entityDescriptor.getEntityName());
+	    map.put("domainDescriptor", entityDescriptor.getDomainDescriptor());
+	    map.put("dtoDescriptor", entityDescriptor.getDtoDescriptor());
+	    map.put("jpaDescriptor", entityDescriptor.getJpaDescriptor());
+	    map.put("attributesMap", entityDescriptor.getAttributesMap());
+	    return map;
+	}
+
+	private void replacePlaceholders(final Map<String, Object> dataModel) {
+	    dataModel.replaceAll((key, value) -> {
+	        if (value instanceof String strValue) {
+	            for (final Map.Entry<String, Object> entry : dataModel.entrySet()) {
+	                strValue = strValue.replace("${" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+	            }
+	            return strValue;
+	        }
+	        return value;
+	    });
+	}
+
 }

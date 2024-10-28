@@ -1,7 +1,9 @@
 package ${packageName}.services;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import lombok.AllArgsConstructor;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -15,8 +17,8 @@ public class ${entityName}ServiceAdapter implements ${entityName}ServicePort {
     private final ${entityName}RepositoryPort repositoryPort;
 
 	@Override
-	public Page<${entityName}Domain> searchWithFilters(final ${entityName}Domain domain, Pageable pageable) {
-	    return repository.findAllByExample(domain, pageable);
+	public Page<${entityName}Domain> searchWithFilters(final ${entityName}Domain domain, final Pageable pageable) {
+	    return repositoryPort.searchWithFilters(domain, pageable);
 	}
 
     @Override

@@ -7,7 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 @Value
 @Builder(access = AccessLevel.PUBLIC)
@@ -26,7 +26,7 @@ public class ${entityName}DTO {
             <#if attribute.maxLength??>
             @Size(max = ${attribute.maxLength}, message = "${attribute.name} não pode ter mais de ${attribute.maxLength} caracteres")
             </#if>
-            
+            @JsonProperty
             ${attribute.type} ${attribute.name};
         </#list>
     </#if>

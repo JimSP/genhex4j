@@ -1,8 +1,9 @@
 package ${packageName}.services;
 
-import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,8 @@ public class ${entityName}Service {
 
     private final ${entityName}RepositoryPort repositoryPort;
 
-    public List<${entityName}Domain> findAll() {
-        return repositoryPort.findAll();
+    Page<${entityName}Domain> searchWithFilters(final ${entityName}Domain domain, final Pageable pageable){
+        return repositoryPort.searchWithFilters(domain, pageable);
     }
 
     public ${entityName}Domain findById(final Long id) {

@@ -1,33 +1,26 @@
 package ${packageName}.repositories;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Example;
 
 import lombok.AllArgsConstructor;
 
 import ${packageName}.domain.${entityName}Domain;
-import ${packageName}.entities.${entityName}Entity;
-import ${packageName}.converters.${entityName}DomainToEntityConverter;
-import ${packageName}.converters.${entityName}EntityToDomainConverter;
+import ${packageName}.entity.${entityName}Entity;
+import ${packageName}.entity.${entityName}DomainToJPAConverter;
+import ${packageName}.entity.${entityName}JPAToDomainConverter;
 
 @Component
 @AllArgsConstructor
 public class ${entityName}RepositoryAdapter implements ${entityName}RepositoryPort {
 
     private final ${entityName}Repository repository;
-    private final ${entityName}DomainToEntityConverter domainToEntityConverter;
-    private final ${entityName}EntityToDomainConverter entityToDomainConverter;
-
-    @Override
-    public List<${entityName}Domain> findAll() {
-        return repository.findAll().stream()
-                         .map(entityToDomainConverter::convert)
-                         .collect(Collectors.toList());
-    }
+    private final ${entityName}DomainToJPAConverter domainToEntityConverter;
+    private final ${entityName}JPAToDomainConverter entityToDomainConverter;
 
     @Override
     public Optional<${entityName}Domain> findById(final Long id) {
@@ -40,6 +33,12 @@ public class ${entityName}RepositoryAdapter implements ${entityName}RepositoryPo
         final ${entityName}Entity entity = domainToEntityConverter.convert(domain);
         final ${entityName}Entity savedEntity = repository.save(entity);
         return entityToDomainConverter.convert(savedEntity);
+    }
+
+    @Override
+    public Page<${entityName}Domain> searchWithFilters(final ${entityName}Domain domain, final Pageable pageable){
+        return repository.findAll(Example.of(domainToEntityConverter.convert(domain)), pageable)
+                         .map(entityToDomainConverter::convert);
     }
 
     @Override
