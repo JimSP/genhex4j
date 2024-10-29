@@ -1,24 +1,45 @@
+
 package br.com.myapp.converter;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 import br.com.myapp.domain.ProdutoDomain;
 import br.com.myapp.dto.ProdutoDTO;
+import br.com.myapp.dto.ProdutoDTOToDomainConverter;
+import br.com.myapp.dto.ProdutoDomainToDTOConverter;
 import br.com.myapp.entity.ProdutoEntity;
-import br.com.myapp.converter.ProdutoConverter;
+import br.com.myapp.entity.ProdutoJPAToDomainConverter;
+import br.com.myapp.entity.ProdutoDomainToJPAConverter;
 
-public class ProdutoConverterTest {
+@SpringBootTest
+class ProdutoConverterTest {
+
+    @Autowired
+    private ProdutoDTOToDomainConverter dtoToDomainConverter;
+    
+    @Autowired
+    private ProdutoDomainToDTOConverter domainToDTOConverter;
+    
+    @Autowired
+    private ProdutoJPAToDomainConverter jpaToDomainConverter;
+    
+    @Autowired
+    private ProdutoDomainToJPAConverter domainToJPAConverter;
 
     @Test
-    public void testDtoToDomainConversion() {
+    void testDtoToDomainConversion() {
         final ProdutoDTO dto = ProdutoDTO.builder()
-            .id(1L)
-            .nome("Example")
-            .descricao("Example")
-            .preco(0.0)
+                .id(testValues.generateTestValue(attribute.type))
+                .nome(testValues.generateTestValue(attribute.type))
+                .descricao(testValues.generateTestValue(attribute.type))
+                .preco(testValues.generateTestValue(attribute.type))
             .build();
 
-        final ProdutoDomain domain = ProdutoConverter.dtoToDomain(dto);
+        final ProdutoDomain domain = dtoToDomainConverter.convert(dto);
 
         assertEquals(dto.getId(), domain.getId());
         assertEquals(dto.getNome(), domain.getNome());
@@ -27,15 +48,15 @@ public class ProdutoConverterTest {
     }
 
     @Test
-    public void testDomainToDtoConversion() {
+    void testDomainToDtoConversion() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-            .id(1L)
-            .nome("Example")
-            .descricao("Example")
-            .preco(0.0)
+                .id(testValues.generateTestValue(attribute.type))
+                .nome(testValues.generateTestValue(attribute.type))
+                .descricao(testValues.generateTestValue(attribute.type))
+                .preco(testValues.generateTestValue(attribute.type))
             .build();
 
-        final ProdutoDTO dto = ProdutoConverter.domainToDto(domain);
+        final ProdutoDTO dto = domainToDTOConverter.convert(domain);
 
         assertEquals(domain.getId(), dto.getId());
         assertEquals(domain.getNome(), dto.getNome());
@@ -44,14 +65,14 @@ public class ProdutoConverterTest {
     }
 
     @Test
-    public void testEntityToDomainConversion() {
+    void testEntityToDomainConversion() {
         final ProdutoEntity entity = new ProdutoEntity();
-        entity.setId(1L);
-        entity.setNome("Example");
-        entity.setDescricao("Example");
-        entity.setPreco(0.0);
+        entity.setId(testValues.generateTestValue(attribute.type));
+        entity.setNome(testValues.generateTestValue(attribute.type));
+        entity.setDescricao(testValues.generateTestValue(attribute.type));
+        entity.setPreco(testValues.generateTestValue(attribute.type));
 
-        final ProdutoDomain domain = ProdutoConverter.entityToDomain(entity);
+        final ProdutoDomain domain = jpaToDomainConverter.convert(entity);
 
         assertEquals(entity.getId(), domain.getId());
         assertEquals(entity.getNome(), domain.getNome());
@@ -60,15 +81,15 @@ public class ProdutoConverterTest {
     }
 
     @Test
-    public void testDomainToEntityConversion() {
-        ProdutoDomain domain = ProdutoDomain.builder()
-            .id(1L)
-            .nome("Example")
-            .descricao("Example")
-            .preco(0.0)
+    void testDomainToEntityConversion() {
+        final ProdutoDomain domain = ProdutoDomain.builder()
+                .id(testValues.generateTestValue(attribute.type))
+                .nome(testValues.generateTestValue(attribute.type))
+                .descricao(testValues.generateTestValue(attribute.type))
+                .preco(testValues.generateTestValue(attribute.type))
             .build();
 
-        ProdutoEntity entity = ProdutoConverter.domainToEntity(domain);
+        final ProdutoEntity entity = domainToJPAConverter.convert(domain);
 
         assertEquals(domain.getId(), entity.getId());
         assertEquals(domain.getNome(), entity.getNome());

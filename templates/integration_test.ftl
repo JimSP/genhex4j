@@ -1,3 +1,5 @@
+<#import "/testValueModule.ftl" as testValues>
+
 package ${packageName}.integration;
 
 import ${packageName}.Application;  // Substitua pelo nome da classe principal da sua aplicação
@@ -40,9 +42,9 @@ public class ${entityName}EndToEndTest {
 
     @Test
     public void testCreate${entityName}AndRetrieveById() throws Exception {
-        ${entityName}DTO ${entityName?uncap_first}DTO = ${entityName}DTO.builder()
+        final ${entityName}DTO ${entityName?uncap_first}DTO = ${entityName}DTO.builder()
             <#list dtoDescriptor.attributes as attribute>
-            .${attribute.name}(<#if attribute.testValue??>${attribute.testValue}<#else><#if attribute.type == "Long">1L</#if><#if attribute.type == "String">"Example"</#if><#if attribute.type == "Double">0.0</#if></#if>)
+            .${attribute.name}(testValues.generateTestValue("${attribute.type}"))
             </#list>
             .build();
 
@@ -54,7 +56,7 @@ public class ${entityName}EndToEndTest {
                 .andExpect(jsonPath("$.id").exists());
 
         // Valida se foi salvo no banco de dados
-        ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.findAll().get(0);
+        final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.findAll().get(0);
         assertThat(savedEntity).isNotNull();
         <#list dtoDescriptor.attributes as attribute>
         assertThat(savedEntity.get${attribute.name?cap_first}()).isEqualTo(${entityName?uncap_first}DTO.get${attribute.name?cap_first}());
@@ -72,16 +74,16 @@ public class ${entityName}EndToEndTest {
 
     @Test
     public void testUpdate${entityName}AndVerifyChanges() throws Exception {
-        ${entityName}Entity ${entityName?uncap_first}Entity = new ${entityName}Entity();
+        final ${entityName}Entity ${entityName?uncap_first}Entity = new ${entityName}Entity();
         <#list jpaDescriptor.attributes as attribute>
-        ${entityName?uncap_first}Entity.set${attribute.name?cap_first}(<#if attribute.testValue??>${attribute.testValue}<#else><#if attribute.type == "Long">1L</#if><#if attribute.type == "String">"Original"</#if><#if attribute.type == "Double">10.0</#if></#if>);
+        final ${entityName?uncap_first}Entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
         </#list>
-        ${entityName?uncap_first}Entity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
+        final ${entityName?uncap_first}Entity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
 
-        ${entityName}DTO updatedDTO = ${entityName}DTO.builder()
+        final ${entityName}DTO updatedDTO = ${entityName}DTO.builder()
             .id(${entityName?uncap_first}Entity.getId())
             <#list dtoDescriptor.attributes as attribute>
-            .${attribute.name}(<#if attribute.testValue??>${attribute.testValue}<#else><#if attribute.type == "String">"Updated"</#if><#if attribute.type == "Double">20.0</#if><#if attribute.type == "Long">2L</#if></#if>)
+            .${attribute.name}(testValues.generateTestValue("${attribute.type}"))
             </#list>
             .build();
 
@@ -92,7 +94,7 @@ public class ${entityName}EndToEndTest {
                 .andExpect(status().isOk());
 
         // Valida se a atualização foi realizada no banco de dados
-        ${entityName}Entity updatedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}Entity.getId()).orElse(null);
+        final ${entityName}Entity updatedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}Entity.getId()).orElse(null);
         assertThat(updatedEntity).isNotNull();
         <#list dtoDescriptor.attributes as attribute>
         assertThat(updatedEntity.get${attribute.name?cap_first}()).isEqualTo(updatedDTO.get${attribute.name?cap_first}());
@@ -101,18 +103,18 @@ public class ${entityName}EndToEndTest {
 
     @Test
     public void testDelete${entityName}AndVerifyRemoval() throws Exception {
-        ${entityName}Entity ${entityName?uncap_first}Entity = new ${entityName}Entity();
+        final ${entityName}Entity ${entityName?uncap_first}Entity = new ${entityName}Entity();
         <#list jpaDescriptor.attributes as attribute>
-        ${entityName?uncap_first}Entity.set${attribute.name?cap_first}(<#if attribute.testValue??>${attribute.testValue}<#else><#if attribute.type == "Long">1L</#if><#if attribute.type == "String">"Example"</#if><#if attribute.type == "Double">0.0</#if></#if>);
+        final ${entityName?uncap_first}Entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
         </#list>
-        ${entityName?uncap_first}Entity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
+        final ${entityName?uncap_first}Entity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
 
         // Deleta a entidade via DELETE
         mockMvc.perform(delete("/api/${entityName?lower_case}s/" + ${entityName?uncap_first}Entity.getId()))
                 .andExpect(status().isNoContent());
 
         // Verifica se foi removida do banco de dados
-        Optional<${entityName}Entity> deletedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}Entity.getId());
+        final Optional<${entityName}Entity> deletedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}Entity.getId());
         assertThat(deletedEntity).isEmpty();
     }
 }

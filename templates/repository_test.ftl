@@ -1,3 +1,5 @@
+<#import "/testValueModule.ftl" as testValues>
+
 package ${packageName}.repository;
 
 import ${packageName}.entity.${entityName}Entity;
@@ -21,43 +23,56 @@ public class ${entityName}RepositoryTest {
     @Test
     public void testSaveAndFindById() {
         final ${entityName}Entity entity = new ${entityName}Entity();
-        entity.setNome("Example");
+        <#list attributes as attribute>
+        entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        </#list>
 
         final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.save(entity);
-        Optional<${entityName}Entity> foundEntity = ${entityName?uncap_first}Repository.findById(savedEntity.getId());
+        final Optional<${entityName}Entity> foundEntity = ${entityName?uncap_first}Repository.findById(savedEntity.getId());
 
         assertTrue(foundEntity.isPresent());
         assertEquals(savedEntity.getId(), foundEntity.get().getId());
-        assertEquals("Example", foundEntity.get().getNome());
+        <#list attributes as attribute>
+        assertEquals(entity.get${attribute.name?cap_first}(), foundEntity.get().get${attribute.name?cap_first}());
+        </#list>
     }
 
     @Test
     public void testFindAll() {
         final ${entityName}Entity entity1 = new ${entityName}Entity();
-        entity1.setNome("Example1");
-        final ${entityName}Entity entity2 = new ${entityName}Entity();
-        entity2.setNome("Example2");
+        <#list attributes as attribute>
+        entity1.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        </#list>
 
-        ${entityName?uncap_first}Repository.save(entity1);
-        ${entityName?uncap_first}Repository.save(entity2);
+        final ${entityName}Entity entity2 = new ${entityName}Entity();
+        <#list attributes as attribute>
+        entity2.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        </#list>
+
+        final ${entityName?uncap_first}Repository.save(entity1);
+        final ${entityName?uncap_first}Repository.save(entity2);
 
         final List<${entityName}Entity> entities = ${entityName?uncap_first}Repository.findAll();
 
         assertEquals(2, entities.size());
-        assertEquals("Example1", entities.get(0).getNome());
-        assertEquals("Example2", entities.get(1).getNome());
+        <#list attributes as attribute>
+        assertEquals(entity1.get${attribute.name?cap_first}(), entities.get(0).get${attribute.name?cap_first}());
+        assertEquals(entity2.get${attribute.name?cap_first}(), entities.get(1).get${attribute.name?cap_first}());
+        </#list>
     }
 
     @Test
     public void testDeleteById() {
         final ${entityName}Entity entity = new ${entityName}Entity();
-        entity.setNome("Example");
+        <#list attributes as attribute>
+        entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        </#list>
 
         final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.save(entity);
-        Long id = savedEntity.getId();
-        
-        final ${entityName?uncap_first}Repository.deleteById(id);
-        Optional<${entityName}Entity> deletedEntity = ${entityName?uncap_first}Repository.findById(id);
+        final Long id = savedEntity.getId();
+
+        ${entityName?uncap_first}Repository.deleteById(id);
+        final Optional<${entityName}Entity> deletedEntity = ${entityName?uncap_first}Repository.findById(id);
 
         assertFalse(deletedEntity.isPresent());
     }

@@ -1,23 +1,36 @@
-package br.com.myapp;
+
+package br.com.myapp.dto;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProdutoDTOTest {
+class ProdutoDTOTest {
 
     @Test
-    public void testProdutoDTOCreation() {
+    void testProdutoDTOCreation() {
         final ProdutoDTO dto = ProdutoDTO
-        			.builder()
-        			.id(1L)
-        			.nome("Example")
-        			.descricao("Example")
-        			.preco(0.0)
-        			.build();
+                .builder()
+                    .id(testValues.generateTestValue("Long"))
+                    .nome(testValues.generateTestValue("String"))
+                    .descricao(testValues.generateTestValue("String"))
+                    .preco(testValues.generateTestValue("Double"))
+                .build();
 
-        assertEquals(1L, dto.getId());
-        assertEquals("Example", dto.getNome());
-        assertEquals("Example", dto.getDescricao());
-        assertEquals(0.0, dto.getPreco());
+        assertEquals(
+            testValues.generateTestValue("Long"), 
+            dto.getId()
+        );
+        assertEquals(
+            testValues.generateTestValue("String"), 
+            dto.getNome()
+        );
+        assertEquals(
+            testValues.generateTestValue("String"), 
+            dto.getDescricao()
+        );
+        assertEquals(
+            testValues.generateTestValue("Double"), 
+            dto.getPreco()
+        );
     }
 }

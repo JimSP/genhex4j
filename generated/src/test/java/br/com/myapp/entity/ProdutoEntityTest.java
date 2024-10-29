@@ -1,27 +1,28 @@
-package br.com.myapp;
+
+package br.com.myapp.entity;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProdutoEntityTest {
+class ProdutoEntityTest {
 
     @Test
-    public void testProdutoEntityGettersAndSetters() {
+    void testProdutoEntityGettersAndSetters() {
         final ProdutoEntity entity = new ProdutoEntity();
         
-        final Long idValue = 1L;
+        final Long idValue = testValues.generateTestValue("Long");
         
         entity.setId(idValue);
         assertEquals(idValue, entity.getId());
-        final String nomeValue = "Exemplo";
+        final String nomeValue = testValues.generateTestValue("String");
         
         entity.setNome(nomeValue);
         assertEquals(nomeValue, entity.getNome());
-        final String descricaoValue = "Exemplo";
+        final String descricaoValue = testValues.generateTestValue("String");
         
         entity.setDescricao(descricaoValue);
         assertEquals(descricaoValue, entity.getDescricao());
-        final Double precoValue = 0.0;
+        final Double precoValue = testValues.generateTestValue("Double");
         
         entity.setPreco(precoValue);
         assertEquals(precoValue, entity.getPreco());

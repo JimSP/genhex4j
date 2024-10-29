@@ -14,15 +14,12 @@ import jakarta.validation.constraints.*;
 @JsonDeserialize(builder = ${entityName}DTO.${entityName}DTOBuilder.class)
 public class ${entityName}DTO {
 
-    <#-- Verifica se dtoDescriptor e seus atributos estão definidos -->
     <#if dtoDescriptor?? && dtoDescriptor.attributes?? && (dtoDescriptor.attributes?size > 0)>
         <#list dtoDescriptor.attributes as attribute>
-            <#-- Validação para NotNull se o atributo for requerido -->
             <#if attribute.required?? && attribute.required>
             @NotNull(message = "${attribute.name} é obrigatório")
             </#if>
 
-            <#-- Validação para o tamanho máximo se maxLength estiver definido -->
             <#if attribute.maxLength??>
             @Size(max = ${attribute.maxLength}, message = "${attribute.name} não pode ter mais de ${attribute.maxLength} caracteres")
             </#if>

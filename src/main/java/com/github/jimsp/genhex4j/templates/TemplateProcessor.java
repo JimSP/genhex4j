@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,21 +15,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jimsp.genhex4j.descriptors.AttributeDescriptor;
 import com.github.jimsp.genhex4j.descriptors.AttributeType;
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
+import com.github.jimsp.genhex4j.random.RandomValueGenerator;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
+@Value
 @Component
 @Slf4j
 public class TemplateProcessor {
 
-	private final Configuration freemarkerConfig;
+	Configuration freemarkerConfig;
 
-	public TemplateProcessor(final Configuration freemarkerConfig) {
-		this.freemarkerConfig = freemarkerConfig;
-	}
 
 	@SneakyThrows
 	public void processTemplates(final EntityDescriptor entityDescriptor) {
@@ -37,7 +38,7 @@ public class TemplateProcessor {
 		for (final TemplateDescriptor templateDesc : templates) {
 			final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor);
 			final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor);
-			generateFileFromTemplate(templateDesc.getTemplateName(), dataModel, outputFileName);
+			generateFileFromTemplate(templateDesc.getTemplateName(), outputFileName, dataModel);
 		}
 	}
 
@@ -70,14 +71,13 @@ public class TemplateProcessor {
 
 	private Map<String, Object> prepareDataModel(final TemplateDescriptor templateDesc,
 			final EntityDescriptor entityDescriptor) {
-
-		final Map<String, Object> dataModel = new HashMap<>();
+		
+		final Map<String, Object> dataModel = entityDescriptorToMap(entityDescriptor);
+		
 	    if (templateDesc.getAdditionalData() != null) {
 	        dataModel.putAll(templateDesc.getAdditionalData());
 	    }
-	    
-	    dataModel.putAll(entityDescriptorToMap(entityDescriptor));
-	    
+	    	    
 	    replacePlaceholders(dataModel);
 	    
 		final AttributeType attributeType = AttributeType.valueOf(templateDesc.getDataModelKey().toUpperCase());
@@ -91,11 +91,8 @@ public class TemplateProcessor {
 		return dataModel;
 	}
 
-	
-	
-	@SneakyThrows
-	public void generateFileFromTemplate(final String templateName, final Map<String, Object> dataModel,
-			final String outputFileName) {
+	public void generateFileFromTemplate(final String templateName,
+			final String outputFileName, final Map<String, Object> dataModel) {
 
 		final String outputPath = outputFileName.substring(0, outputFileName.lastIndexOf('/'));
 		final File directory = new File(outputPath);
@@ -110,21 +107,30 @@ public class TemplateProcessor {
 			final Template template = freemarkerConfig.getTemplate(templateName);
 			template.process(dataModel, writer);
 			log.info("create {} with template {}", outputFileName, templateName);
+		}catch (Exception e) {
+			
+			log.error("error create {} with template {}", outputFileName, templateName, e);
+			
+			throw new RuntimeException(String.format("error create %s with template %s", outputFileName, templateName), e);
 		}
 	}
 
 	private Map<String, Object> entityDescriptorToMap(EntityDescriptor entityDescriptor) {
-		final Map<String, Object> map = new HashMap<>();
+		
+		final Map<String, Object> map = dataModel();
+		
 	    map.put("packageName", entityDescriptor.getPackageName());
 	    map.put("entityName", entityDescriptor.getEntityName());
 	    map.put("domainDescriptor", entityDescriptor.getDomainDescriptor());
 	    map.put("dtoDescriptor", entityDescriptor.getDtoDescriptor());
 	    map.put("jpaDescriptor", entityDescriptor.getJpaDescriptor());
 	    map.put("attributesMap", entityDescriptor.getAttributesMap());
+	    
 	    return map;
 	}
 
 	private void replacePlaceholders(final Map<String, Object> dataModel) {
+		
 	    dataModel.replaceAll((key, value) -> {
 	        if (value instanceof String strValue) {
 	            for (final Map.Entry<String, Object> entry : dataModel.entrySet()) {
@@ -136,4 +142,16 @@ public class TemplateProcessor {
 	    });
 	}
 
+	private Map<String, Object> dataModel() {
+		
+		final Map<String, Object> dataModel = Collections.synchronizedMap(new HashMap<>());
+		
+		dataModel.put("randomLong", RandomValueGenerator.generateRandomLong());
+		dataModel.put("randomString", RandomValueGenerator.generateRandomString());
+		dataModel.put("randomDouble", RandomValueGenerator.generateRandomDouble());
+		dataModel.put("randomInteger", RandomValueGenerator.generateRandomInteger());
+		dataModel.put("randomBoolean", RandomValueGenerator.generateRandomBoolean());
+		
+		return dataModel;
+	}
 }

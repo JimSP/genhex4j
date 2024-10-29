@@ -120,7 +120,7 @@
     },
     {
       "templateName": "controller_test.ftl",
-      "outputPathPattern": "generated/src/test/java/${packageName}/controller/${entityName}ControllerTest.java",
+      "outputPathPattern": "generated/src/test/java/${packageName}/controllers/${entityName}ControllerTest.java",
       "dataModelKey": "dto"
     },
     {
@@ -154,7 +154,7 @@
       "dataModelKey": "pom",
       "additionalData": {
         "groupId": "${packageName}",
-        "artifactId": "genhex4j",
+        "artifactId": "${entityName}-app",
         "version": "0.0.1-SNAPSHOT",
         "name": "${entityName}-app",
         "description": "Gerado por GenHex4j",

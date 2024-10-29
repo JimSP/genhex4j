@@ -1,23 +1,36 @@
-package br.com.myapp;
+
+package br.com.myapp.domain;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProdutoDomainTest {
+class ProdutoDomainTest {
 
     @Test
-    public void testProdutoDomainCreation() {
+    void testProdutoDomainCreation() {
         final ProdutoDomain domain = ProdutoDomain
-		        	.builder()
-		            .id(1L)
-		            .nome("Exemplo")
-		            .descricao("Exemplo")
-		            .preco(0.0)
-		            .build();
+                .builder()
+                    .id(testValues.generateTestValue("Long"))
+                    .nome(testValues.generateTestValue("String"))
+                    .descricao(testValues.generateTestValue("String"))
+                    .preco(testValues.generateTestValue("Double"))
+                .build();
 
-        assertEquals(1L, domain.getId());
-        assertEquals("Exemplo", domain.getNome());
-        assertEquals("Exemplo", domain.getDescricao());
-        assertEquals(0.0, domain.getPreco());
+        assertEquals(
+            testValues.generateTestValue("Long"), 
+            domain.getId()
+        );
+        assertEquals(
+            testValues.generateTestValue("String"), 
+            domain.getNome()
+        );
+        assertEquals(
+            testValues.generateTestValue("String"), 
+            domain.getDescricao()
+        );
+        assertEquals(
+            testValues.generateTestValue("Double"), 
+            domain.getPreco()
+        );
     }
 }

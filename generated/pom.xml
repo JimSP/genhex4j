@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>br.com.myapp</groupId>
-    <artifactId>genhex4j</artifactId>
+    <artifactId>Produto-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Produto-app</name>
     <description>Gerado por GenHex4j</description>

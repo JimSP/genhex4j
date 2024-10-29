@@ -1,3 +1,4 @@
+
 package br.com.myapp.repository;
 
 import br.com.myapp.entity.ProdutoEntity;
@@ -21,43 +22,37 @@ public class ProdutoRepositoryTest {
     @Test
     public void testSaveAndFindById() {
         final ProdutoEntity entity = new ProdutoEntity();
-        entity.setNome("Example");
 
         final ProdutoEntity savedEntity = produtoRepository.save(entity);
-        Optional<ProdutoEntity> foundEntity = produtoRepository.findById(savedEntity.getId());
+        final Optional<ProdutoEntity> foundEntity = produtoRepository.findById(savedEntity.getId());
 
         assertTrue(foundEntity.isPresent());
         assertEquals(savedEntity.getId(), foundEntity.get().getId());
-        assertEquals("Example", foundEntity.get().getNome());
     }
 
     @Test
     public void testFindAll() {
         final ProdutoEntity entity1 = new ProdutoEntity();
-        entity1.setNome("Example1");
-        final ProdutoEntity entity2 = new ProdutoEntity();
-        entity2.setNome("Example2");
 
-        produtoRepository.save(entity1);
-        produtoRepository.save(entity2);
+        final ProdutoEntity entity2 = new ProdutoEntity();
+
+        final produtoRepository.save(entity1);
+        final produtoRepository.save(entity2);
 
         final List<ProdutoEntity> entities = produtoRepository.findAll();
 
         assertEquals(2, entities.size());
-        assertEquals("Example1", entities.get(0).getNome());
-        assertEquals("Example2", entities.get(1).getNome());
     }
 
     @Test
     public void testDeleteById() {
         final ProdutoEntity entity = new ProdutoEntity();
-        entity.setNome("Example");
 
         final ProdutoEntity savedEntity = produtoRepository.save(entity);
-        Long id = savedEntity.getId();
-        
-        final produtoRepository.deleteById(id);
-        Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(id);
+        final Long id = savedEntity.getId();
+
+        produtoRepository.deleteById(id);
+        final Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(id);
 
         assertFalse(deletedEntity.isPresent());
     }

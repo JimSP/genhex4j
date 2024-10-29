@@ -1,3 +1,4 @@
+
 package br.com.myapp.integration;
 
 import br.com.myapp.Application;  // Substitua pelo nome da classe principal da sua aplicação
@@ -40,11 +41,11 @@ public class ProdutoEndToEndTest {
 
     @Test
     public void testCreateProdutoAndRetrieveById() throws Exception {
-        ProdutoDTO produtoDTO = ProdutoDTO.builder()
-            .id(1L)
-            .nome("Example")
-            .descricao("Example")
-            .preco(0.0)
+        final ProdutoDTO produtoDTO = ProdutoDTO.builder()
+            .id(testValues.generateTestValue("Long"))
+            .nome(testValues.generateTestValue("String"))
+            .descricao(testValues.generateTestValue("String"))
+            .preco(testValues.generateTestValue("Double"))
             .build();
 
         // Cria a entidade via POST
@@ -55,7 +56,7 @@ public class ProdutoEndToEndTest {
                 .andExpect(jsonPath("$.id").exists());
 
         // Valida se foi salvo no banco de dados
-        ProdutoEntity savedEntity = produtoRepository.findAll().get(0);
+        final ProdutoEntity savedEntity = produtoRepository.findAll().get(0);
         assertThat(savedEntity).isNotNull();
         assertThat(savedEntity.getId()).isEqualTo(produtoDTO.getId());
         assertThat(savedEntity.getNome()).isEqualTo(produtoDTO.getNome());
@@ -76,19 +77,19 @@ public class ProdutoEndToEndTest {
 
     @Test
     public void testUpdateProdutoAndVerifyChanges() throws Exception {
-        ProdutoEntity produtoEntity = new ProdutoEntity();
-        produtoEntity.setId(1L);
-        produtoEntity.setNome("Original");
-        produtoEntity.setDescricao("Original");
-        produtoEntity.setPreco(10.0);
-        produtoEntity = produtoRepository.save(produtoEntity);
+        final ProdutoEntity produtoEntity = new ProdutoEntity();
+        final produtoEntity.setId(testValues.generateTestValue("Long"));
+        final produtoEntity.setNome(testValues.generateTestValue("String"));
+        final produtoEntity.setDescricao(testValues.generateTestValue("String"));
+        final produtoEntity.setPreco(testValues.generateTestValue("Double"));
+        final produtoEntity = produtoRepository.save(produtoEntity);
 
-        ProdutoDTO updatedDTO = ProdutoDTO.builder()
+        final ProdutoDTO updatedDTO = ProdutoDTO.builder()
             .id(produtoEntity.getId())
-            .id(2L)
-            .nome("Updated")
-            .descricao("Updated")
-            .preco(20.0)
+            .id(testValues.generateTestValue("Long"))
+            .nome(testValues.generateTestValue("String"))
+            .descricao(testValues.generateTestValue("String"))
+            .preco(testValues.generateTestValue("Double"))
             .build();
 
         // Atualiza a entidade via PUT
@@ -98,7 +99,7 @@ public class ProdutoEndToEndTest {
                 .andExpect(status().isOk());
 
         // Valida se a atualização foi realizada no banco de dados
-        ProdutoEntity updatedEntity = produtoRepository.findById(produtoEntity.getId()).orElse(null);
+        final ProdutoEntity updatedEntity = produtoRepository.findById(produtoEntity.getId()).orElse(null);
         assertThat(updatedEntity).isNotNull();
         assertThat(updatedEntity.getId()).isEqualTo(updatedDTO.getId());
         assertThat(updatedEntity.getNome()).isEqualTo(updatedDTO.getNome());
@@ -108,19 +109,19 @@ public class ProdutoEndToEndTest {
 
     @Test
     public void testDeleteProdutoAndVerifyRemoval() throws Exception {
-        ProdutoEntity produtoEntity = new ProdutoEntity();
-        produtoEntity.setId(1L);
-        produtoEntity.setNome("Example");
-        produtoEntity.setDescricao("Example");
-        produtoEntity.setPreco(0.0);
-        produtoEntity = produtoRepository.save(produtoEntity);
+        final ProdutoEntity produtoEntity = new ProdutoEntity();
+        final produtoEntity.setId(testValues.generateTestValue("Long"));
+        final produtoEntity.setNome(testValues.generateTestValue("String"));
+        final produtoEntity.setDescricao(testValues.generateTestValue("String"));
+        final produtoEntity.setPreco(testValues.generateTestValue("Double"));
+        final produtoEntity = produtoRepository.save(produtoEntity);
 
         // Deleta a entidade via DELETE
         mockMvc.perform(delete("/api/produtos/" + produtoEntity.getId()))
                 .andExpect(status().isNoContent());
 
         // Verifica se foi removida do banco de dados
-        Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(produtoEntity.getId());
+        final Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(produtoEntity.getId());
         assertThat(deletedEntity).isEmpty();
     }
 }

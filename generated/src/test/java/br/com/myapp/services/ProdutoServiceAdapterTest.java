@@ -1,3 +1,4 @@
+
 package br.com.myapp.services;
 
 import br.com.myapp.domain.ProdutoDomain;
@@ -28,38 +29,70 @@ public class ProdutoServiceAdapterTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testFindById() {
-        final ProdutoDomain domain = new ProdutoDomain(1L, "Example", 0.0);
+        final ProdutoDomain domain = new ProdutoDomain(
+                    1L
+    
+ ,
+                    "Example"
+    
+ ,
+                    "Example"
+    
+ ,
+                    0.0
+    
+ 
+        );
 
-        when(repositoryPort.findById(1L)).thenReturn(Optional.of(domain));
+        when(repositoryPort.findById(domain.getId())).thenReturn(Optional.of(domain));
 
-        final ProdutoDomain result = produtoServiceAdapter.findById(1L);
+        final ProdutoDomain result = produtoServiceAdapter.findById(domain.getId());
 
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Example", result.getNome());
+        assertEquals(domain.getId(), result.getId());
+        assertEquals(domain.getNome(), result.getNome());
+        assertEquals(domain.getDescricao(), result.getDescricao());
+        assertEquals(domain.getPreco(), result.getPreco());
     }
 
     @Test
     public void testSaveProduto() {
-        final ProdutoDomain domain = new ProdutoDomain(1L, "Example", 0.0);
+        final ProdutoDomain domain = new ProdutoDomain(
+                    1L
+    
+ ,
+                    "Example"
+    
+ ,
+                    "Example"
+    
+ ,
+                    0.0
+    
+ 
+        );
 
         when(repositoryPort.save(domain)).thenReturn(domain);
 
         final ProdutoDomain result = produtoServiceAdapter.save(domain);
 
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Example", result.getNome());
+        assertEquals(domain.getId(), result.getId());
+        assertEquals(domain.getNome(), result.getNome());
+        assertEquals(domain.getDescricao(), result.getDescricao());
+        assertEquals(domain.getPreco(), result.getPreco());
     }
 
     @Test
     public void testDeleteById() {
-        final Long id = 1L;
+        final Long id =     1L
+    
+;
 
         doNothing().when(repositoryPort).deleteById(id);
 
@@ -70,9 +103,51 @@ public class ProdutoServiceAdapterTest {
 
     @Test
     public void testFindAllWithFilters() {
-        final ProdutoDomain filterDomain = new ProdutoDomain(null, "Example", null);
-        final ProdutoDomain domain1 = new ProdutoDomain(1L, "Example", 0.0);
-        final ProdutoDomain domain2 = new ProdutoDomain(2L, "Example", 1.0);
+        final ProdutoDomain filterDomain = new ProdutoDomain(
+                    1L
+    
+ ,
+                    "Example"
+    
+ ,
+                    "Example"
+    
+ ,
+                    0.0
+    
+ 
+        );
+
+        final ProdutoDomain domain1 = new ProdutoDomain(
+                    1L
+    
+ ,
+                    "Example"
+    
+ ,
+                    "Example"
+    
+ ,
+                    0.0
+    
+ 
+        );
+
+        final ProdutoDomain domain2 = new ProdutoDomain(
+                    1L
+    
+ ,
+                    "Example"
+    
+ ,
+                    "Example"
+    
+ ,
+                    0.0
+    
+ 
+        );
+
         final List<ProdutoDomain> domainList = Arrays.asList(domain1, domain2);
         final Page<ProdutoDomain> domainPage = new PageImpl<>(domainList);
 
@@ -81,7 +156,13 @@ public class ProdutoServiceAdapterTest {
         final Page<ProdutoDomain> results = produtoServiceAdapter.searchWithFilters(filterDomain, Pageable.unpaged());
 
         assertEquals(2, results.getTotalElements());
-        assertEquals("Example", results.getContent().get(0).getNome());
-        assertEquals("Example", results.getContent().get(1).getNome());
+        assertEquals(domain1.getId(), results.getContent().get(0).getId());
+        assertEquals(domain2.getId(), results.getContent().get(1).getId());
+        assertEquals(domain1.getNome(), results.getContent().get(0).getNome());
+        assertEquals(domain2.getNome(), results.getContent().get(1).getNome());
+        assertEquals(domain1.getDescricao(), results.getContent().get(0).getDescricao());
+        assertEquals(domain2.getDescricao(), results.getContent().get(1).getDescricao());
+        assertEquals(domain1.getPreco(), results.getContent().get(0).getPreco());
+        assertEquals(domain2.getPreco(), results.getContent().get(1).getPreco());
     }
 }
