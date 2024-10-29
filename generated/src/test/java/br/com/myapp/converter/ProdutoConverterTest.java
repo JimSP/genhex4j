@@ -1,4 +1,3 @@
-
 package br.com.myapp.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +32,10 @@ class ProdutoConverterTest {
     @Test
     void testDtoToDomainConversion() {
         final ProdutoDTO dto = ProdutoDTO.builder()
-                .id(testValues.generateTestValue(attribute.type))
-                .nome(testValues.generateTestValue(attribute.type))
-                .descricao(testValues.generateTestValue(attribute.type))
-                .preco(testValues.generateTestValue(attribute.type))
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
             .build();
 
         final ProdutoDomain domain = dtoToDomainConverter.convert(dto);
@@ -50,10 +49,10 @@ class ProdutoConverterTest {
     @Test
     void testDomainToDtoConversion() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(testValues.generateTestValue(attribute.type))
-                .nome(testValues.generateTestValue(attribute.type))
-                .descricao(testValues.generateTestValue(attribute.type))
-                .preco(testValues.generateTestValue(attribute.type))
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
             .build();
 
         final ProdutoDTO dto = domainToDTOConverter.convert(domain);
@@ -67,10 +66,10 @@ class ProdutoConverterTest {
     @Test
     void testEntityToDomainConversion() {
         final ProdutoEntity entity = new ProdutoEntity();
-        entity.setId(testValues.generateTestValue(attribute.type));
-        entity.setNome(testValues.generateTestValue(attribute.type));
-        entity.setDescricao(testValues.generateTestValue(attribute.type));
-        entity.setPreco(testValues.generateTestValue(attribute.type));
+        entity.setId(1L);
+        entity.setNome("Example String");
+        entity.setDescricao("Example String");
+        entity.setPreco(10.5);
 
         final ProdutoDomain domain = jpaToDomainConverter.convert(entity);
 
@@ -83,10 +82,10 @@ class ProdutoConverterTest {
     @Test
     void testDomainToEntityConversion() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(testValues.generateTestValue(attribute.type))
-                .nome(testValues.generateTestValue(attribute.type))
-                .descricao(testValues.generateTestValue(attribute.type))
-                .preco(testValues.generateTestValue(attribute.type))
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
             .build();
 
         final ProdutoEntity entity = domainToJPAConverter.convert(domain);

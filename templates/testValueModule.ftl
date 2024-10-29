@@ -1,9 +1,1 @@
-<#-- Módulo de geração de valores de teste baseado no tipo do atributo -->
-<#macro generateTestValue type>
-    <#if type == "Long">1L
-    <#elseif type == "String">"Example"
-    <#elseif type == "Double">0.0
-    <#elseif type == "Integer">1
-    <#elseif type == "Boolean">true
-    <#else>null</#if>
-</#macro>
+<#macro generateTestValue type><#if type == "Long">1L<#elseif type == "String">"Example String"<#elseif type == "Double">10.5<#elseif type == "Integer">42<#elseif type == "Boolean">true<#elseif type == "Date">new java.util.Date()<#elseif type == "BigDecimal">new java.math.BigDecimal("10.50")<#elseif type == "List">java.util.Arrays.asList("Item1", "Item2")<#elseif type == "Map">java.util.Collections.singletonMap("key", "value")<#else>null</#if></#macro>

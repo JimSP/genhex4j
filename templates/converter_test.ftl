@@ -1,11 +1,4 @@
-<#-- Importa os módulos de templates necessários -->
 <#import "testValueModule.ftl" as testValues>
-<#import "dtoToEntityConverter.ftl" as dtoToEntityConverter>
-<#import "entityToDtoConverter.ftl" as entityToDtoConverter>
-<#import "generateValidations.ftl" as validations>
-<#import "generateErrorMessage.ftl" as errorMessage>
-<#import "generateResponse.ftl" as response>
-
 package ${packageName}.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +34,7 @@ class ${entityName}ConverterTest {
     void testDtoToDomainConversion() {
         final ${entityName}DTO dto = ${entityName}DTO.builder()
             <#list dtoDescriptor.attributes as attribute>
-                .${attribute.name}(testValues.generateTestValue(attribute.type))
+                .${attribute.name}(<@testValues.generateTestValue attribute.type />)
             </#list>
             .build();
 
@@ -56,7 +49,7 @@ class ${entityName}ConverterTest {
     void testDomainToDtoConversion() {
         final ${entityName}Domain domain = ${entityName}Domain.builder()
             <#list domainDescriptor.attributes as attribute>
-                .${attribute.name}(testValues.generateTestValue(attribute.type))
+                .${attribute.name}(<@testValues.generateTestValue attribute.type />)
             </#list>
             .build();
 
@@ -71,7 +64,7 @@ class ${entityName}ConverterTest {
     void testEntityToDomainConversion() {
         final ${entityName}Entity entity = new ${entityName}Entity();
         <#list jpaDescriptor.attributes as attribute>
-        entity.set${attribute.name?cap_first}(testValues.generateTestValue(attribute.type));
+        entity.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
         </#list>
 
         final ${entityName}Domain domain = jpaToDomainConverter.convert(entity);
@@ -85,7 +78,7 @@ class ${entityName}ConverterTest {
     void testDomainToEntityConversion() {
         final ${entityName}Domain domain = ${entityName}Domain.builder()
             <#list domainDescriptor.attributes as attribute>
-                .${attribute.name}(testValues.generateTestValue(attribute.type))
+                .${attribute.name}(<@testValues.generateTestValue attribute.type />)
             </#list>
             .build();
 

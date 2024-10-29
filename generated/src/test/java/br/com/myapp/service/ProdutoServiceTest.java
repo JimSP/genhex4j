@@ -32,18 +32,10 @@ public class ProdutoServiceTest {
     @Test
     public void testFindById() {
         final ProdutoDomain domain = new ProdutoDomain(
-                    1L
-    
- ,
-                    "Example"
-    
- ,
-                    "Example"
-    
- ,
-                    0.0
-    
- 
+                1L ,
+                "Example String" ,
+                "Example String" ,
+                10.5 
         );
 
         when(repositoryPort.findById(domain.getId())).thenReturn(Optional.of(domain));
@@ -60,18 +52,10 @@ public class ProdutoServiceTest {
     @Test
     public void testSaveProduto() {
         final ProdutoDomain domain = new ProdutoDomain(
-                    1L
-    
- ,
-                    "Example"
-    
- ,
-                    "Example"
-    
- ,
-                    0.0
-    
- 
+                1L ,
+                "Example String" ,
+                "Example String" ,
+                10.5 
         );
 
         when(repositoryPort.save(domain)).thenReturn(domain);
@@ -87,9 +71,7 @@ public class ProdutoServiceTest {
 
     @Test
     public void testDeleteById() {
-        final Long id =     1L
-    
-;
+        final Long id = 1L;
 
         doNothing().when(repositoryPort).deleteById(id);
 
@@ -101,33 +83,17 @@ public class ProdutoServiceTest {
     @Test
     public void testFindAll() {
         final ProdutoDomain domain1 = new ProdutoDomain(
-                    1L
-    
- ,
-                    "Example"
-    
- ,
-                    "Example"
-    
- ,
-                    0.0
-    
- 
+                1L ,
+                "Example String" ,
+                "Example String" ,
+                10.5 
         );
 
         final ProdutoDomain domain2 = new ProdutoDomain(
-                    1L
-    
- ,
-                    "Example"
-    
- ,
-                    "Example"
-    
- ,
-                    0.0
-    
- 
+                1L ,
+                "Example String" ,
+                "Example String" ,
+                10.5 
         );
 
         final List<ProdutoDomain> domainList = Arrays.asList(domain1, domain2);
