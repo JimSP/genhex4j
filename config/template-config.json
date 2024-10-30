@@ -1,6 +1,20 @@
 {
 	"templates": [
 		{
+			"templateName": "application.ftl",
+			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
+			"dataModelKey": "domain"
+		},
+		{
+			"templateName": "application-test.tfl",
+			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
+			"dataModelKey": "domain",
+			"additionalData": {
+				"author": "Alexandre M S Lima",
+				"date": "2024-10-26"
+			}
+		},
+		{
 			"templateName": "entity.ftl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/entities/${entityName}Entity.java",
 			"dataModelKey": "jpa",
@@ -94,9 +108,13 @@
 			"dataModelKey": "dto"
 		},
 		{
-			"templateName": "application.ftl",
+			"templateName": "application-test.tfl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
-			"dataModelKey": "domain"
+			"dataModelKey": "domain",
+			"additionalData": {
+				"author": "Alexandre M S Lima",
+				"date": "2024-10-26"
+			}
 		},
 		{
 			"templateName": "dto_test.ftl",
