@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
-import ${packageName}.domain.${entityName}Domain;
+import ${packageName}.domains.${entityName}Domain;
 
 public interface ${entityName}RepositoryPort {
 

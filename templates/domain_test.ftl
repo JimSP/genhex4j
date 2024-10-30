@@ -1,6 +1,6 @@
-<#import "/testValueModule.ftl" as testValues>
+<#import "testValueModule.ftl" as testValues>
 
-package ${packageName}.domain;
+package ${packageName}.domains;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,13 +12,13 @@ class ${entityName}DomainTest {
         final ${entityName}Domain domain = ${entityName}Domain
                 .builder()
                 <#list domainDescriptor.attributes as attribute>
-                    .${attribute.name}(testValues.generateTestValue("${attribute.type}"))
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
                 </#list>
                 .build();
 
         <#list domainDescriptor.attributes as attribute>
         assertEquals(
-            testValues.generateTestValue("${attribute.type}"), 
+            <@testValues.generateTestValue attribute.type />, 
             domain.get${attribute.name?cap_first}()
         );
         </#list>

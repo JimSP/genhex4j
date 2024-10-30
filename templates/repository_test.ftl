@@ -1,8 +1,10 @@
-<#import "/testValueModule.ftl" as testValues>
+<#import "testValueModule.ftl" as testValues>
 
-package ${packageName}.repository;
+package ${packageName}.repositories;
 
-import ${packageName}.entity.${entityName}Entity;
+import ${packageName}.entities.${entityName}Entity;
+import ${packageName}.repositories.${entityName}Repository;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Transactional
-public class ${entityName}RepositoryTest {
+class ${entityName}RepositoryTest {
 
     @Autowired
     private ${entityName}Repository ${entityName?uncap_first}Repository;
 
     @Test
-    public void testSaveAndFindById() {
+    void testSaveAndFindById() {
         final ${entityName}Entity entity = new ${entityName}Entity();
         <#list attributes as attribute>
-        entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        entity.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
         </#list>
 
         final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.save(entity);
@@ -38,19 +40,19 @@ public class ${entityName}RepositoryTest {
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         final ${entityName}Entity entity1 = new ${entityName}Entity();
         <#list attributes as attribute>
-        entity1.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        entity1.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
         </#list>
 
         final ${entityName}Entity entity2 = new ${entityName}Entity();
         <#list attributes as attribute>
-        entity2.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        entity2.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
         </#list>
 
-        final ${entityName?uncap_first}Repository.save(entity1);
-        final ${entityName?uncap_first}Repository.save(entity2);
+        ${entityName?uncap_first}Repository.save(entity1);
+        ${entityName?uncap_first}Repository.save(entity2);
 
         final List<${entityName}Entity> entities = ${entityName?uncap_first}Repository.findAll();
 
@@ -62,10 +64,10 @@ public class ${entityName}RepositoryTest {
     }
 
     @Test
-    public void testDeleteById() {
+    void testDeleteById() {
         final ${entityName}Entity entity = new ${entityName}Entity();
         <#list attributes as attribute>
-        entity.set${attribute.name?cap_first}(testValues.generateTestValue("${attribute.type}"));
+        entity.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
         </#list>
 
         final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.save(entity);
@@ -78,7 +80,7 @@ public class ${entityName}RepositoryTest {
     }
 
     @Test
-    public void testFindByNonExistentId() {
+    void testFindByNonExistentId() {
         final Optional<${entityName}Entity> entity = ${entityName?uncap_first}Repository.findById(999L);
         assertFalse(entity.isPresent(), "Expected no entity to be found with ID 999");
     }

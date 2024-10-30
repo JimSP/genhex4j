@@ -1,29 +1,31 @@
 
-package br.com.myapp.integration;
+package br.com.myapp;
 
-import br.com.myapp.Application;  // Substitua pelo nome da classe principal da sua aplicação
-import br.com.myapp.controller.ProdutoController;
-import br.com.myapp.dto.ProdutoDTO;
-import br.com.myapp.entity.ProdutoEntity;
-import br.com.myapp.repository.ProdutoRepository;
-import br.com.myapp.service.ProdutoService;
+import br.com.myapp.dtos.ProdutoDTO;
+import br.com.myapp.entities.ProdutoEntity;
+import br.com.myapp.repositories.ProdutoRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = ProdutoApplication.class)
 @AutoConfigureMockMvc
-public class ProdutoEndToEndTest {
+class ProdutoEndToEndTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,17 +37,17 @@ public class ProdutoEndToEndTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         produtoRepository.deleteAll();
     }
 
     @Test
-    public void testCreateProdutoAndRetrieveById() throws Exception {
+    void testCreateProdutoAndRetrieveById() throws Exception {
         final ProdutoDTO produtoDTO = ProdutoDTO.builder()
-            .id(testValues.generateTestValue("Long"))
-            .nome(testValues.generateTestValue("String"))
-            .descricao(testValues.generateTestValue("String"))
-            .preco(testValues.generateTestValue("Double"))
+            .id(1L)
+            .nome("Example String")
+            .descricao("Example String")
+            .preco(10.5)
             .build();
 
         // Cria a entidade via POST
@@ -76,30 +78,30 @@ public class ProdutoEndToEndTest {
     }
 
     @Test
-    public void testUpdateProdutoAndVerifyChanges() throws Exception {
+    void testUpdateProdutoAndVerifyChanges() throws Exception {
         final ProdutoEntity produtoEntity = new ProdutoEntity();
-        final produtoEntity.setId(testValues.generateTestValue("Long"));
-        final produtoEntity.setNome(testValues.generateTestValue("String"));
-        final produtoEntity.setDescricao(testValues.generateTestValue("String"));
-        final produtoEntity.setPreco(testValues.generateTestValue("Double"));
-        final produtoEntity = produtoRepository.save(produtoEntity);
+        produtoEntity.setId(1L);
+        produtoEntity.setNome("Example String");
+        produtoEntity.setDescricao("Example String");
+        produtoEntity.setPreco(10.5);
+        final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
         final ProdutoDTO updatedDTO = ProdutoDTO.builder()
-            .id(produtoEntity.getId())
-            .id(testValues.generateTestValue("Long"))
-            .nome(testValues.generateTestValue("String"))
-            .descricao(testValues.generateTestValue("String"))
-            .preco(testValues.generateTestValue("Double"))
+            .id(produtoSavedEntity.getId())
+            .id(1L)
+            .nome("Example String")
+            .descricao("Example String")
+            .preco(10.5)
             .build();
 
         // Atualiza a entidade via PUT
-        mockMvc.perform(put("/api/produtos/" + produtoEntity.getId())
+        mockMvc.perform(put("/api/produtos/" + produtoSavedEntity.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDTO)))
                 .andExpect(status().isOk());
 
         // Valida se a atualização foi realizada no banco de dados
-        final ProdutoEntity updatedEntity = produtoRepository.findById(produtoEntity.getId()).orElse(null);
+        final ProdutoEntity updatedEntity = produtoRepository.findById(produtoSavedEntity.getId()).orElse(null);
         assertThat(updatedEntity).isNotNull();
         assertThat(updatedEntity.getId()).isEqualTo(updatedDTO.getId());
         assertThat(updatedEntity.getNome()).isEqualTo(updatedDTO.getNome());
@@ -108,20 +110,20 @@ public class ProdutoEndToEndTest {
     }
 
     @Test
-    public void testDeleteProdutoAndVerifyRemoval() throws Exception {
+    void testDeleteProdutoAndVerifyRemoval() throws Exception {
         final ProdutoEntity produtoEntity = new ProdutoEntity();
-        final produtoEntity.setId(testValues.generateTestValue("Long"));
-        final produtoEntity.setNome(testValues.generateTestValue("String"));
-        final produtoEntity.setDescricao(testValues.generateTestValue("String"));
-        final produtoEntity.setPreco(testValues.generateTestValue("Double"));
-        final produtoEntity = produtoRepository.save(produtoEntity);
+        produtoEntity.setId(1L);
+        produtoEntity.setNome("Example String");
+        produtoEntity.setDescricao("Example String");
+        produtoEntity.setPreco(10.5);
+        final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
         // Deleta a entidade via DELETE
-        mockMvc.perform(delete("/api/produtos/" + produtoEntity.getId()))
+        mockMvc.perform(delete("/api/produtos/" + produtoSavedEntity.getId()))
                 .andExpect(status().isNoContent());
 
         // Verifica se foi removida do banco de dados
-        final Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(produtoEntity.getId());
+        final Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(produtoSavedEntity.getId());
         assertThat(deletedEntity).isEmpty();
     }
 }

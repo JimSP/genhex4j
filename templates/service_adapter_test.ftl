@@ -1,14 +1,16 @@
-<#import "/testValueModule.ftl" as testValues>
-
+<#import "testValueModule.ftl" as testValues>
 package ${packageName}.services;
 
-import ${packageName}.domain.${entityName}Domain;
+import ${packageName}.domains.${entityName}Domain;
 import ${packageName}.repositories.${entityName}RepositoryPort;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.*;
 
-public class ${entityName}ServiceAdapterTest {
+class ${entityName}ServiceAdapterTest {
 
     @Mock
     private ${entityName}RepositoryPort repositoryPort;
@@ -34,12 +37,13 @@ public class ${entityName}ServiceAdapterTest {
     }
 
     @Test
-    public void testFindById() {
-        final ${entityName}Domain domain = new ${entityName}Domain(
-            <#list domainDescriptor.attributes as attribute>
-                <@testValues.generateTestValue attribute.type /> <#if attribute_has_next>,</#if>
-            </#list>
-        );
+    void testFindById() {
+        final ${entityName}Domain domain = ${entityName}Domain
+                .builder()
+                <#list domainDescriptor.attributes as attribute>
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+                </#list>
+                .build();
 
         when(repositoryPort.findById(domain.getId())).thenReturn(Optional.of(domain));
 
@@ -52,12 +56,13 @@ public class ${entityName}ServiceAdapterTest {
     }
 
     @Test
-    public void testSave${entityName}() {
-        final ${entityName}Domain domain = new ${entityName}Domain(
-            <#list domainDescriptor.attributes as attribute>
-                <@testValues.generateTestValue attribute.type /> <#if attribute_has_next>,</#if>
-            </#list>
-        );
+    void testSave${entityName}() {
+        final ${entityName}Domain domain = ${entityName}Domain
+                .builder()
+                <#list domainDescriptor.attributes as attribute>
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+                </#list>
+                .build();
 
         when(repositoryPort.save(domain)).thenReturn(domain);
 
@@ -70,40 +75,43 @@ public class ${entityName}ServiceAdapterTest {
     }
 
     @Test
-    public void testDeleteById() {
-        final Long id = <@testValues.generateTestValue "Long" />;
+    void testDeleteById() {
+        final Long id = 1L;
 
         doNothing().when(repositoryPort).deleteById(id);
 
-        final ${entityName?uncap_first}ServiceAdapter.deleteById(id);
+        ${entityName?uncap_first}ServiceAdapter.deleteById(id);
 
         verify(repositoryPort, times(1)).deleteById(id);
     }
 
     @Test
-    public void testFindAllWithFilters() {
-        final ${entityName}Domain filterDomain = new ${entityName}Domain(
-            <#list domainDescriptor.attributes as attribute>
-                <@testValues.generateTestValue attribute.type /> <#if attribute_has_next>,</#if>
-            </#list>
-        );
+    void testFindAllWithFilters() {
+        final ${entityName}Domain filterDomain = ${entityName}Domain
+                .builder()
+                <#list domainDescriptor.attributes as attribute>
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+                </#list>
+                .build();
 
-        final ${entityName}Domain domain1 = new ${entityName}Domain(
-            <#list domainDescriptor.attributes as attribute>
-                <@testValues.generateTestValue attribute.type /> <#if attribute_has_next>,</#if>
-            </#list>
-        );
+        final ${entityName}Domain domain1 = ${entityName}Domain
+                .builder()
+                <#list domainDescriptor.attributes as attribute>
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+                </#list>
+                .build();
 
-        final ${entityName}Domain domain2 = new ${entityName}Domain(
-            <#list domainDescriptor.attributes as attribute>
-                <@testValues.generateTestValue attribute.type /> <#if attribute_has_next>,</#if>
-            </#list>
-        );
+        final ${entityName}Domain domain2 = ${entityName}Domain
+                .builder()
+                <#list domainDescriptor.attributes as attribute>
+                    .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+                </#list>
+                .build();
 
         final List<${entityName}Domain> domainList = Arrays.asList(domain1, domain2);
         final Page<${entityName}Domain> domainPage = new PageImpl<>(domainList);
 
-        when(repositoryPort.findAllByExample(filterDomain, Pageable.unpaged())).thenReturn(domainPage);
+        when(repositoryPort.searchWithFilters(filterDomain, Pageable.unpaged())).thenReturn(domainPage);
 
         final Page<${entityName}Domain> results = ${entityName?uncap_first}ServiceAdapter.searchWithFilters(filterDomain, Pageable.unpaged());
 

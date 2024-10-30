@@ -1,4 +1,4 @@
-package ${packageName}.domain;
+package ${packageName}.domains;
 
 import lombok.AccessLevel;
 import lombok.Builder;

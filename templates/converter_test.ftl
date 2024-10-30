@@ -1,5 +1,5 @@
 <#import "testValueModule.ftl" as testValues>
-package ${packageName}.converter;
+package ${packageName}.converters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,13 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import ${packageName}.domain.${entityName}Domain;
-import ${packageName}.dto.${entityName}DTO;
-import ${packageName}.dto.${entityName}DTOToDomainConverter;
-import ${packageName}.dto.${entityName}DomainToDTOConverter;
-import ${packageName}.entity.${entityName}Entity;
-import ${packageName}.entity.${entityName}JPAToDomainConverter;
-import ${packageName}.entity.${entityName}DomainToJPAConverter;
+import ${packageName}.domains.${entityName}Domain;
+import ${packageName}.dtos.${entityName}DTO;
+import ${packageName}.entities.${entityName}Entity;
 
 @SpringBootTest
 class ${entityName}ConverterTest {

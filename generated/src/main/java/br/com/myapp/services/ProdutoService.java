@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
-import br.com.myapp.domain.ProdutoDomain;
+import br.com.myapp.domains.ProdutoDomain;
 import br.com.myapp.repositories.ProdutoRepositoryPort;
 
 @Service

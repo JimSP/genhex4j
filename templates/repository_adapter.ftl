@@ -9,10 +9,10 @@ import org.springframework.data.domain.Example;
 
 import lombok.AllArgsConstructor;
 
-import ${packageName}.domain.${entityName}Domain;
-import ${packageName}.entity.${entityName}Entity;
-import ${packageName}.entity.${entityName}DomainToJPAConverter;
-import ${packageName}.entity.${entityName}JPAToDomainConverter;
+import ${packageName}.domains.${entityName}Domain;
+import ${packageName}.entities.${entityName}Entity;
+import ${packageName}.converters.${entityName}DomainToJPAConverter;
+import ${packageName}.converters.${entityName}JPAToDomainConverter;
 
 @Component
 @AllArgsConstructor

@@ -11,11 +11,11 @@ import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 
-import br.com.myapp.domain.ProdutoDomain;
-import br.com.myapp.dto.ProdutoDTO;
+import br.com.myapp.domains.ProdutoDomain;
+import br.com.myapp.dtos.ProdutoDTO;
 import br.com.myapp.services.ProdutoServicePort;
-import br.com.myapp.dto.ProdutoDTOToDomainConverter;
-import br.com.myapp.dto.ProdutoDomainToDTOConverter;
+import br.com.myapp.converters.ProdutoDTOToDomainConverter;
+import br.com.myapp.converters.ProdutoDomainToDTOConverter;
 
 @RestController
 @RequestMapping("/api/produtos")

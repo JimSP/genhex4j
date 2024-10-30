@@ -2,10 +2,10 @@
 package br.com.myapp.controllers;
 
 import br.com.myapp.services.ProdutoServicePort;
-import br.com.myapp.dto.ProdutoDTO;
-import br.com.myapp.dto.ProdutoDTOToDomainConverter;
-import br.com.myapp.dto.ProdutoDomainToDTOConverter;
-import br.com.myapp.domain.ProdutoDomain;
+import br.com.myapp.dtos.ProdutoDTO;
+import br.com.myapp.converters.ProdutoDTOToDomainConverter;
+import br.com.myapp.converters.ProdutoDomainToDTOConverter;
+import br.com.myapp.domains.ProdutoDomain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

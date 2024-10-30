@@ -3,7 +3,7 @@ package ${packageName}.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import ${packageName}.domain.${entityName}Domain;
+import ${packageName}.domains.${entityName}Domain;
 
 public interface ${entityName}ServicePort {
 

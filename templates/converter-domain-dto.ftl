@@ -1,7 +1,7 @@
-package ${packageName}.dto;
+package ${packageName}.converters;
 
-import ${packageName}.domain.${entityName}Domain;
-import ${packageName}.dto.${entityName}DTO;
+import ${packageName}.domains.${entityName}Domain;
+import ${packageName}.dtos.${entityName}DTO;
 
 import org.springframework.stereotype.Component;
 

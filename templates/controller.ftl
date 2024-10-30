@@ -11,11 +11,11 @@ import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 
-import ${packageName}.domain.${entityName}Domain;
-import ${packageName}.dto.${entityName}DTO;
+import ${packageName}.domains.${entityName}Domain;
+import ${packageName}.dtos.${entityName}DTO;
 import ${packageName}.services.${entityName}ServicePort;
-import ${packageName}.dto.${entityName}DTOToDomainConverter;
-import ${packageName}.dto.${entityName}DomainToDTOConverter;
+import ${packageName}.converters.${entityName}DTOToDomainConverter;
+import ${packageName}.converters.${entityName}DomainToDTOConverter;
 
 @RestController
 @RequestMapping("/api/${entityName?lower_case}s")

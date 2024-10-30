@@ -1,3 +1,4 @@
+
 package br.com.myapp.services;
 
 import br.com.myapp.domains.ProdutoDomain;
@@ -10,25 +11,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.mockito.Mockito.*;
 
-class ProdutoServiceAdapterTest {
+class ProdutoServiceTest {
 
     @Mock
     private ProdutoRepositoryPort repositoryPort;
 
     @InjectMocks
-    private ProdutoServiceAdapter produtoServiceAdapter;
+    private ProdutoService produtoService;
 
     @BeforeEach
     public void setup() {
@@ -47,7 +45,7 @@ class ProdutoServiceAdapterTest {
 
         when(repositoryPort.findById(domain.getId())).thenReturn(Optional.of(domain));
 
-        final ProdutoDomain result = produtoServiceAdapter.findById(domain.getId());
+        final ProdutoDomain result = produtoService.findById(domain.getId());
 
         assertNotNull(result);
         assertEquals(domain.getId(), result.getId());
@@ -68,7 +66,7 @@ class ProdutoServiceAdapterTest {
 
         when(repositoryPort.save(domain)).thenReturn(domain);
 
-        final ProdutoDomain result = produtoServiceAdapter.save(domain);
+        final ProdutoDomain result = produtoService.save(domain);
 
         assertNotNull(result);
         assertEquals(domain.getId(), result.getId());
@@ -83,52 +81,45 @@ class ProdutoServiceAdapterTest {
 
         doNothing().when(repositoryPort).deleteById(id);
 
-        produtoServiceAdapter.deleteById(id);
+        produtoService.deleteById(id);
 
         verify(repositoryPort, times(1)).deleteById(id);
     }
 
     @Test
-    void testFindAllWithFilters() {
-        final ProdutoDomain filterDomain = ProdutoDomain
-                .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
-                .build();
+    void testSearchWithFilters() {
+        final ProdutoDomain filterDomain = ProdutoDomain.builder()
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
+            .build();
+        final Pageable pageable = Pageable.unpaged();
 
-        final ProdutoDomain domain1 = ProdutoDomain
-                .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
-                .build();
+        final ProdutoDomain domain1 = ProdutoDomain.builder()
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
+            .build();
 
-        final ProdutoDomain domain2 = ProdutoDomain
-                .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
-                .build();
+        final ProdutoDomain domain2 = ProdutoDomain.builder()
+                .id(1L)
+                .nome("Example String")
+                .descricao("Example String")
+                .preco(10.5)
+            .build();
 
-        final List<ProdutoDomain> domainList = Arrays.asList(domain1, domain2);
+        final List<ProdutoDomain> domainList = List.of(domain1, domain2);
         final Page<ProdutoDomain> domainPage = new PageImpl<>(domainList);
 
-        when(repositoryPort.searchWithFilters(filterDomain, Pageable.unpaged())).thenReturn(domainPage);
+        when(repositoryPort.searchWithFilters(filterDomain, pageable)).thenReturn(domainPage);
 
-        final Page<ProdutoDomain> results = produtoServiceAdapter.searchWithFilters(filterDomain, Pageable.unpaged());
+        final Page<ProdutoDomain> results = produtoService.searchWithFilters(filterDomain, pageable);
 
+        assertNotNull(results);
         assertEquals(2, results.getTotalElements());
-        assertEquals(domain1.getId(), results.getContent().get(0).getId());
-        assertEquals(domain2.getId(), results.getContent().get(1).getId());
-        assertEquals(domain1.getNome(), results.getContent().get(0).getNome());
-        assertEquals(domain2.getNome(), results.getContent().get(1).getNome());
-        assertEquals(domain1.getDescricao(), results.getContent().get(0).getDescricao());
-        assertEquals(domain2.getDescricao(), results.getContent().get(1).getDescricao());
-        assertEquals(domain1.getPreco(), results.getContent().get(0).getPreco());
-        assertEquals(domain2.getPreco(), results.getContent().get(1).getPreco());
+        assertEquals(domain1, results.getContent().get(0));
+        assertEquals(domain2, results.getContent().get(1));
     }
 }

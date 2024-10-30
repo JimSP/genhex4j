@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
-import ${packageName}.domain.${entityName}Domain;
+import ${packageName}.domains.${entityName}Domain;
 import ${packageName}.repositories.${entityName}RepositoryPort;
 
 @Service

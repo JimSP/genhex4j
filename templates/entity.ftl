@@ -1,4 +1,4 @@
-package ${packageName}.entity;
+package ${packageName}.entities;
 
 import lombok.Data;
 import lombok.Builder;

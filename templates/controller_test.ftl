@@ -1,12 +1,12 @@
-<#import "/testValueModule.ftl" as testValues>
+<#import "testValueModule.ftl" as testValues>
 
 package ${packageName}.controllers;
 
 import ${packageName}.services.${entityName}ServicePort;
-import ${packageName}.dto.${entityName}DTO;
-import ${packageName}.dto.${entityName}DTOToDomainConverter;
-import ${packageName}.dto.${entityName}DomainToDTOConverter;
-import ${packageName}.domain.${entityName}Domain;
+import ${packageName}.dtos.${entityName}DTO;
+import ${packageName}.converters.${entityName}DTOToDomainConverter;
+import ${packageName}.converters.${entityName}DomainToDTOConverter;
+import ${packageName}.domains.${entityName}Domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
