@@ -27,8 +27,7 @@ public class ${entityName}Controller {
     private final ${entityName}DomainToDTOConverter domainToDtoConverter;
 
 	@GetMapping("/search")
-	public ResponseEntity<Page<${entityName}DTO>> search${entityName}(
-	        @ModelAttribute final ${entityName}DTO dto, final Pageable pageable) {
+	public ResponseEntity<Page<${entityName}DTO>> search${entityName}(final ${entityName}DTO dto, final Pageable pageable) {
 	    final ${entityName}Domain domain = dtoToDomainConverter.convert(dto);
 	    final Page<${entityName}Domain> domainsPage = service.searchWithFilters(domain, pageable);
 	    final Page<${entityName}DTO> dtosPage = domainsPage.map(domainToDtoConverter::convert);

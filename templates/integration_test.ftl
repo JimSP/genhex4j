@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,27 +49,29 @@ class ${entityName}EndToEndTest {
             </#list>
             .build();
 
-        // Cria a entidade via POST
-        mockMvc.perform(post("/api/${entityName?lower_case}s")
+        final String response = mockMvc.perform(post("/api/${entityName?lower_case}s")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(${entityName?uncap_first}DTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists());
-
-        // Valida se foi salvo no banco de dados
-        final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.findAll().get(0);
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+		
+		final ${entityName}DTO ${entityName?uncap_first}ResponseDTO = objectMapper.readValue(response, ${entityName}DTO.class);
+		
+        final ${entityName}Entity savedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}ResponseDTO.getId()).get();
         assertThat(savedEntity).isNotNull();
         <#list dtoDescriptor.attributes as attribute>
-        assertThat(savedEntity.get${attribute.name?cap_first}()).isEqualTo(${entityName?uncap_first}DTO.get${attribute.name?cap_first}());
+        assertThat(savedEntity.get${attribute.name?cap_first}()).isEqualTo(${entityName?uncap_first}ResponseDTO.get${attribute.name?cap_first}());
         </#list>
 
-        // Recupera a entidade pelo ID via GET
         mockMvc.perform(get("/api/${entityName?lower_case}s/" + savedEntity.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedEntity.getId()))
                 <#list dtoDescriptor.attributes as attribute>
-                .andExpect(jsonPath("$.${attribute.name}").value(${entityName?uncap_first}DTO.get${attribute.name?cap_first}()))
+                .andExpect(jsonPath("$.${attribute.name}").value(${entityName?uncap_first}ResponseDTO.get${attribute.name?cap_first}()))
                 </#list>;
     }
 
@@ -89,13 +90,11 @@ class ${entityName}EndToEndTest {
             </#list>
             .build();
 
-        // Atualiza a entidade via PUT
         mockMvc.perform(put("/api/${entityName?lower_case}s/" + ${entityName?uncap_first}SavedEntity.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDTO)))
                 .andExpect(status().isOk());
 
-        // Valida se a atualização foi realizada no banco de dados
         final ${entityName}Entity updatedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}SavedEntity.getId()).orElse(null);
         assertThat(updatedEntity).isNotNull();
         <#list dtoDescriptor.attributes as attribute>
@@ -111,12 +110,61 @@ class ${entityName}EndToEndTest {
         </#list>
         final ${entityName}Entity ${entityName?uncap_first}SavedEntity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
 
-        // Deleta a entidade via DELETE
         mockMvc.perform(delete("/api/${entityName?lower_case}s/" + ${entityName?uncap_first}SavedEntity.getId()))
                 .andExpect(status().isNoContent());
 
-        // Verifica se foi removida do banco de dados
         final Optional<${entityName}Entity> deletedEntity = ${entityName?uncap_first}Repository.findById(${entityName?uncap_first}SavedEntity.getId());
         assertThat(deletedEntity).isEmpty();
+    }
+
+    @Test
+    void testSearch${entityName}WithFilters() throws Exception {
+        final ${entityName}Entity ${entityName?uncap_first}Entity = new ${entityName}Entity();
+        <#list jpaDescriptor.attributes as attribute>
+        ${entityName?uncap_first}Entity.set${attribute.name?cap_first}(<@testValues.generateTestValue attribute.type />);
+        </#list>
+        
+        final ${entityName}Entity ${entityName?uncap_first}SavedEntity = ${entityName?uncap_first}Repository.save(${entityName?uncap_first}Entity);
+
+        mockMvc.perform(get("/api/${entityName?lower_case}s/search?id="+${entityName?uncap_first}SavedEntity.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", "0")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                <#list dtoDescriptor.attributes as attribute>
+                .andExpect(jsonPath("$.content[0].${attribute.name}").value(${entityName?uncap_first}SavedEntity.get${attribute.name?cap_first}()))
+                </#list>;
+    }
+    
+    @Test
+    void testGetProdutoNotFound() throws Exception {
+    
+    	mockMvc.perform(get("/api/${entityName?lower_case}s/-1")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    void testDeleteProdutoAndVerifyNotFound() throws Exception {
+
+        mockMvc.perform(delete("/api/${entityName?lower_case}s/-1"))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    void testUpdateProdutoAndVerifyNotFound() throws Exception {
+
+    	 final ${entityName}DTO updatedDTO = ${entityName}DTO.builder()
+            <#list dtoDescriptor.attributes as attribute>
+            .${attribute.name}(<@testValues.generateTestValue attribute.type />)
+            </#list>
+            .build();
+
+        mockMvc.perform(put("/api/${entityName?lower_case}s/-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedDTO)))
+                .andExpect(status().isNotFound());
     }
 }

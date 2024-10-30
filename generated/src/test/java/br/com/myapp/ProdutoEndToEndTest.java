@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,30 +49,32 @@ class ProdutoEndToEndTest {
             .preco(10.5)
             .build();
 
-        // Cria a entidade via POST
-        mockMvc.perform(post("/api/produtos")
+        final String response = mockMvc.perform(post("/api/produtos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(produtoDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists());
-
-        // Valida se foi salvo no banco de dados
-        final ProdutoEntity savedEntity = produtoRepository.findAll().get(0);
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+		
+		final ProdutoDTO produtoResponseDTO = objectMapper.readValue(response, ProdutoDTO.class);
+		
+        final ProdutoEntity savedEntity = produtoRepository.findById(produtoResponseDTO.getId()).get();
         assertThat(savedEntity).isNotNull();
-        assertThat(savedEntity.getId()).isEqualTo(produtoDTO.getId());
-        assertThat(savedEntity.getNome()).isEqualTo(produtoDTO.getNome());
-        assertThat(savedEntity.getDescricao()).isEqualTo(produtoDTO.getDescricao());
-        assertThat(savedEntity.getPreco()).isEqualTo(produtoDTO.getPreco());
+        assertThat(savedEntity.getId()).isEqualTo(produtoResponseDTO.getId());
+        assertThat(savedEntity.getNome()).isEqualTo(produtoResponseDTO.getNome());
+        assertThat(savedEntity.getDescricao()).isEqualTo(produtoResponseDTO.getDescricao());
+        assertThat(savedEntity.getPreco()).isEqualTo(produtoResponseDTO.getPreco());
 
-        // Recupera a entidade pelo ID via GET
         mockMvc.perform(get("/api/produtos/" + savedEntity.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedEntity.getId()))
-                .andExpect(jsonPath("$.id").value(produtoDTO.getId()))
-                                .andExpect(jsonPath("$.nome").value(produtoDTO.getNome()))
-                                .andExpect(jsonPath("$.descricao").value(produtoDTO.getDescricao()))
-                                .andExpect(jsonPath("$.preco").value(produtoDTO.getPreco()))
+                .andExpect(jsonPath("$.id").value(produtoResponseDTO.getId()))
+                                .andExpect(jsonPath("$.nome").value(produtoResponseDTO.getNome()))
+                                .andExpect(jsonPath("$.descricao").value(produtoResponseDTO.getDescricao()))
+                                .andExpect(jsonPath("$.preco").value(produtoResponseDTO.getPreco()))
                 ;
     }
 
@@ -94,13 +95,11 @@ class ProdutoEndToEndTest {
             .preco(10.5)
             .build();
 
-        // Atualiza a entidade via PUT
         mockMvc.perform(put("/api/produtos/" + produtoSavedEntity.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDTO)))
                 .andExpect(status().isOk());
 
-        // Valida se a atualização foi realizada no banco de dados
         final ProdutoEntity updatedEntity = produtoRepository.findById(produtoSavedEntity.getId()).orElse(null);
         assertThat(updatedEntity).isNotNull();
         assertThat(updatedEntity.getId()).isEqualTo(updatedDTO.getId());
@@ -118,12 +117,65 @@ class ProdutoEndToEndTest {
         produtoEntity.setPreco(10.5);
         final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
-        // Deleta a entidade via DELETE
         mockMvc.perform(delete("/api/produtos/" + produtoSavedEntity.getId()))
                 .andExpect(status().isNoContent());
 
-        // Verifica se foi removida do banco de dados
         final Optional<ProdutoEntity> deletedEntity = produtoRepository.findById(produtoSavedEntity.getId());
         assertThat(deletedEntity).isEmpty();
+    }
+
+    @Test
+    void testSearchProdutoWithFilters() throws Exception {
+        final ProdutoEntity produtoEntity = new ProdutoEntity();
+        produtoEntity.setId(1L);
+        produtoEntity.setNome("Example String");
+        produtoEntity.setDescricao("Example String");
+        produtoEntity.setPreco(10.5);
+        
+        final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
+
+        mockMvc.perform(get("/api/produtos/search?id="+produtoSavedEntity.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", "0")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(produtoSavedEntity.getId()))
+                                .andExpect(jsonPath("$.content[0].nome").value(produtoSavedEntity.getNome()))
+                                .andExpect(jsonPath("$.content[0].descricao").value(produtoSavedEntity.getDescricao()))
+                                .andExpect(jsonPath("$.content[0].preco").value(produtoSavedEntity.getPreco()))
+                ;
+    }
+    
+    @Test
+    void testGetProdutoNotFound() throws Exception {
+    
+    	mockMvc.perform(get("/api/produtos/-1")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    void testDeleteProdutoAndVerifyNotFound() throws Exception {
+
+        mockMvc.perform(delete("/api/produtos/-1"))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    void testUpdateProdutoAndVerifyNotFound() throws Exception {
+
+    	 final ProdutoDTO updatedDTO = ProdutoDTO.builder()
+            .id(1L)
+            .nome("Example String")
+            .descricao("Example String")
+            .preco(10.5)
+            .build();
+
+        mockMvc.perform(put("/api/produtos/-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedDTO)))
+                .andExpect(status().isNotFound());
     }
 }

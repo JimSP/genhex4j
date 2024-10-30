@@ -79,11 +79,6 @@
 			"dataModelKey": "jpa"
 		},
 		{
-			"templateName": "service.ftl",
-			"outputPathPattern": "generated/src/main/java/${packageName}/services/${entityName}Service.java",
-			"dataModelKey": "domain"
-		},
-		{
 			"templateName": "service_port.ftl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/services/${entityName}ServicePort.java",
 			"dataModelKey": "domain"
@@ -127,11 +122,6 @@
 			"templateName": "controller_test.ftl",
 			"outputPathPattern": "generated/src/test/java/${packageName}/controllers/${entityName}ControllerTest.java",
 			"dataModelKey": "dto"
-		},
-		{
-			"templateName": "service_test.ftl",
-			"outputPathPattern": "generated/src/test/java/${packageName}/services/${entityName}ServiceTest.java",
-			"dataModelKey": "domain"
 		},
 		{
 			"templateName": "repository_test.ftl",
