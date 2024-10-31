@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 
 import lombok.AllArgsConstructor;
 
@@ -37,7 +38,11 @@ public class ${entityName}RepositoryAdapter implements ${entityName}RepositoryPo
 
     @Override
     public Page<${entityName}Domain> searchWithFilters(final ${entityName}Domain domain, final Pageable pageable){
-        return repository.findAll(Example.of(domainToEntityConverter.convert(domain)), pageable)
+    	
+    	final ${entityName}Entity entity = domainToEntityConverter.convert(domain);
+    	final Example<${entityName}Entity> example = Example.of(entity, ExampleMatcher.matchingAll());
+    	
+        return repository.findAll(example, pageable)
                          .map(entityToDomainConverter::convert);
     }
 

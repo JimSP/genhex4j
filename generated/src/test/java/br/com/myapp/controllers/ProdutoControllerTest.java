@@ -1,38 +1,41 @@
 
 package br.com.myapp.controllers;
 
-import br.com.myapp.services.ProdutoServicePort;
-import br.com.myapp.dtos.ProdutoDTO;
-import br.com.myapp.converters.ProdutoDTOToDomainConverter;
-import br.com.myapp.converters.ProdutoDomainToDTOConverter;
-import br.com.myapp.domains.ProdutoDomain;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.myapp.converters.ProdutoDTOToDomainConverter;
+import br.com.myapp.converters.ProdutoDomainToDTOConverter;
+import br.com.myapp.domains.ProdutoDomain;
+import br.com.myapp.dtos.ProdutoDTO;
+import br.com.myapp.entities.ProdutoEntity;
+import br.com.myapp.services.ProdutoServicePort;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -133,24 +136,26 @@ class ProdutoControllerTest {
 
     @Test
     void testSearchProduto() throws Exception {
-        final ProdutoDTO dto = ProdutoDTO.builder()
-            .build();
-
-        final ProdutoDomain domain = ProdutoDomain.builder()
-            .build();
-
-        final List<ProdutoDomain> domainList = Arrays.asList(domain);
-        final Page<ProdutoDomain> page = new PageImpl<>(domainList);
+    	
+    	final ProdutoDomain domain = ProdutoDomain.builder()
+    			.id(1L)
+                .build();
+    	
         final Pageable pageable = PageRequest.of(0, 10);
 
-        when(dtoToDomainConverter.convert(dto)).thenReturn(domain);
-        when(service.searchWithFilters(domain, pageable)).thenReturn(page);
-        when(domainToDtoConverter.convert(domain)).thenReturn(dto);
+        when(service.searchWithFilters(domain, pageable)).thenReturn(new PageImpl<>(Arrays.asList(domain)));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/produtos/search")
+        mockMvc.perform(get("/api/produtos/search?id=1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(dto.getId()));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(domain.getId()))
+                                .andExpect(jsonPath("$.content[0].nome").value(domain.getNome()))
+                                .andExpect(jsonPath("$.content[0].descricao").value(domain.getDescricao()))
+                                .andExpect(jsonPath("$.content[0].preco").value(domain.getPreco()))
+                ;
     }
 }

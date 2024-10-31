@@ -174,10 +174,11 @@ class ${entityName}ControllerTest {
         when(dtoToDomainConverter.convert(dto)).thenReturn(domain);
         when(service.searchWithFilters(domain, pageable)).thenReturn(page);
         when(domainToDtoConverter.convert(domain)).thenReturn(dto);
+        
+        when(dtoToDomainConverter.convert(dto)).thenReturn(domain);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/${entityName?lower_case}s/search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(dto.getId()));
     }

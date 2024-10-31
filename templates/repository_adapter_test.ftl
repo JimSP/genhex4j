@@ -134,6 +134,10 @@ class ${entityName}RepositoryAdapterTest {
             .build();
 
         when(repository.findAll(any(), eq(pageable))).thenReturn(entityPage);
+        
+        when(domainToEntityConverter.convert(domain1)).thenReturn(entity1);
+        when(domainToEntityConverter.convert(domain2)).thenReturn(entity2);
+        
         when(entityToDomainConverter.convert(entity1)).thenReturn(domain1);
         when(entityToDomainConverter.convert(entity2)).thenReturn(domain2);
 

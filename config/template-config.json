@@ -3,11 +3,15 @@
 		{
 			"templateName": "application.ftl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
-			"dataModelKey": "domain"
+			"dataModelKey": "domain",
+			"additionalData": {
+				"author": "Alexandre M S Lima",
+				"date": "2024-10-26"
+			}
 		},
 		{
 			"templateName": "application-test.tfl",
-			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
+			"outputPathPattern": "generated/src/test/java/${packageName}/${entityName}ApplicationTest.java",
 			"dataModelKey": "domain",
 			"additionalData": {
 				"author": "Alexandre M S Lima",
@@ -106,15 +110,6 @@
 			"templateName": "controller.ftl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/controllers/${entityName}Controller.java",
 			"dataModelKey": "dto"
-		},
-		{
-			"templateName": "application-test.tfl",
-			"outputPathPattern": "generated/src/main/java/${packageName}/${entityName}Application.java",
-			"dataModelKey": "domain",
-			"additionalData": {
-				"author": "Alexandre M S Lima",
-				"date": "2024-10-26"
-			}
 		},
 		{
 			"templateName": "dto_test.ftl",
