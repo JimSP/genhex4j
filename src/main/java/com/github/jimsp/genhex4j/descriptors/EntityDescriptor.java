@@ -6,6 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Value;
@@ -16,28 +19,38 @@ import lombok.Value;
 public class EntityDescriptor {
 	
 	@JsonProperty
+	@NotBlank
 	String packageName;
 	
 	@JsonProperty
+	@NotBlank
     String entityName;
 	
 	@JsonProperty
-    Map<AttributeType, List<AttributeDescriptor>> attributesMap;
+	@NotNull
+	@NotEmpty
+    Map<AttributeType, @NotEmpty List<@NotNull AttributeDescriptor>> attributesMap;
 	
 	@JsonProperty
+	@NotNull
     DomainDescriptor domainDescriptor;
 	
 	@JsonProperty
+	@NotNull
     DtoDescriptor dtoDescriptor;
     
     @JsonProperty
+    @NotNull
     JpaDescriptor jpaDescriptor;
     
     @JsonProperty
+    @NotBlank
     String systemPrompt;
     
     @JsonProperty
-    List<RuleDescriptor> rulesDescriptor;
+    @NotNull
+    @NotEmpty
+    List<@NotNull RuleDescriptor> rulesDescriptor;
 
     public void addAttributes(final AttributeType key, final List<AttributeDescriptor> attributes) {
     	

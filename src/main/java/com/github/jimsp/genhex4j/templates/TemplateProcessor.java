@@ -1,9 +1,10 @@
 package com.github.jimsp.genhex4j.templates;
 
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +23,7 @@ import com.github.jimsp.genhex4j.descriptors.AttributeDescriptor;
 import com.github.jimsp.genhex4j.descriptors.AttributeType;
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
 import com.github.jimsp.genhex4j.descriptors.RuleDescriptor;
-import com.github.jimsp.genhex4j.random.RandomValueGenerator;
+import com.github.jimsp.genhex4j.randons.RandomValueGenerator;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -37,6 +38,7 @@ public class TemplateProcessor {
 
 	Configuration freemarkerConfig;
 	OpenAiChatModel openAiChatModel;
+	FileSystem inMemoryFileSystem;
 	
 	public List<TemplateDescriptor> loadTemplates(final Predicate<TemplateDescriptor> filter) {
 	    
@@ -57,18 +59,18 @@ public class TemplateProcessor {
 	}
 
 	@SneakyThrows
-	public void processStandardTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor) {
+	public void processStandardTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
 
 		for (final TemplateDescriptor templateDesc : templates) {
 			
 			final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor);
 			final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor);
-			generateFileFromTemplate(templateDesc.getTemplateName(), outputFileName, dataModel);
+			generateFileFromTemplate(fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
 		}
 	}
 	
 	@SneakyThrows
-	public void processRuleTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor) {
+	public void processRuleTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
 		
 	    for (final TemplateDescriptor templateDesc : templates) {
 	        
@@ -78,7 +80,7 @@ public class TemplateProcessor {
 	            
 	        	final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor, (String) ruleData.get("ruleName"));
 	        	final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor, ruleData);
-	            generateFileFromTemplate(templateDesc.getTemplateName(), outputFileName, dataModel);
+	            generateFileFromTemplate(fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
 	        }
 	    }
 	}
@@ -198,29 +200,29 @@ public class TemplateProcessor {
 		return ruleDescriptor.getRuleOutput().trim().toLowerCase().contains("void") ? "return;" : "return null;";
 	}
 
-	public void generateFileFromTemplate(final String templateName,
-			final String outputFileName, final Map<String, Object> dataModel) {
+	@SneakyThrows
+	private void generateFileFromTemplate(final Path fileSystemIdentifier,
+										  final String templateName,
+	                                      final String outputFileName, 
+	                                      final Map<String, Object> dataModel) {
 
-		final String outputPath = outputFileName.substring(0, outputFileName.lastIndexOf('/'));
-		final File directory = new File(outputPath);
+	    final Path outputFilePath = fileSystemIdentifier.resolve(outputFileName);
+	    final Path parentDir = outputFilePath.getParent();
 
-		if (!directory.exists()) {
-			directory.mkdirs();
-		}
+	    if (!Files.exists(parentDir)) {
+	        Files.createDirectories(parentDir);
+	    }
 
-		final File outputFile = new File(outputFileName);
-
-		try (final FileWriter writer = new FileWriter(outputFile)) {
-			final Template template = freemarkerConfig.getTemplate(templateName);
-			template.process(dataModel, writer);
-			log.info("create {} with template {}", outputFileName, templateName);
-		}catch (Exception e) {
-			
-			log.error("error create {} with template {}", outputFileName, templateName, e);
-			
-			throw new RuntimeException(String.format("error create %s with template %s", outputFileName, templateName), e);
-		}
+	    try (final BufferedWriter writer = Files.newBufferedWriter(outputFilePath)) {
+	        final Template template = freemarkerConfig.getTemplate(templateName);
+	        template.process(dataModel, writer);
+	        log.info("Created {} with template {}", outputFileName, templateName);
+	    } catch (Exception e) {
+	        log.error("Error creating {} with template {}", outputFileName, templateName, e);
+	        throw new RuntimeException(String.format("Error creating %s with template %s", outputFileName, templateName), e);
+	    }
 	}
+
 
 	private Map<String, Object> entityDescriptorToMap(EntityDescriptor entityDescriptor) {
 		

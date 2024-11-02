@@ -1,4 +1,4 @@
-package com.github.jimsp.genhex4j.random;
+package com.github.jimsp.genhex4j.randons;
 
 import java.util.Random;
 

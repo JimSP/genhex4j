@@ -1,4 +1,4 @@
-package com.github.jimsp.genhex4j.configuration;
+package com.github.jimsp.genhex4j.configurations;
 
 import java.io.File;
 
