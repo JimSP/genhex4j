@@ -34,6 +34,9 @@ public class EntityDescriptor {
     JpaDescriptor jpaDescriptor;
     
     @JsonProperty
+    String systemPrompt;
+    
+    @JsonProperty
     List<RuleDescriptor> rulesDescriptor;
 
     public void addAttributes(final AttributeType key, final List<AttributeDescriptor> attributes) {

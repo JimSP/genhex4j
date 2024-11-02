@@ -3,14 +3,18 @@ package com.github.jimsp.genhex4j.templates;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TemplateProcessor {
 
 	Configuration freemarkerConfig;
+	OpenAiChatModel openAiChatModel;
 	
 	public List<TemplateDescriptor> loadTemplates(final Predicate<TemplateDescriptor> filter) {
 	    
@@ -43,7 +48,7 @@ public class TemplateProcessor {
 	        return config.getTemplates()
 	        		.stream()
 	                .filter(filter)
-	                .collect(Collectors.toList());
+	                .toList();
 	        
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -67,7 +72,7 @@ public class TemplateProcessor {
 		
 	    for (final TemplateDescriptor templateDesc : templates) {
 	        
-	    	final List<Map<String, Object>> rulesList = prepareRulesList(entityDescriptor);
+	    	final List<Map<String, Object>> rulesList = prepareRulesList(templateDesc, entityDescriptor);
 
 	        for (Map<String, Object> ruleData : rulesList) {
 	            
@@ -148,7 +153,7 @@ public class TemplateProcessor {
 	    return dataModel;
 	}
 	
-	private List<Map<String, Object>> prepareRulesList(final EntityDescriptor entityDescriptor) {
+	private List<Map<String, Object>> prepareRulesList(final TemplateDescriptor templateDescriptor, final EntityDescriptor entityDescriptor) {
 	    
 		final List<Map<String, Object>> rulesList = new ArrayList<>();
 
@@ -160,17 +165,36 @@ public class TemplateProcessor {
 	        ruleData.put("additionalInput", ruleDescriptor.getRuleAdditionalInput());
 	        ruleData.put("javaFunctionalInterface", ruleDescriptor.getJavaFunctionalInterface());
 	        ruleData.put("javaFuncionalIntefaceMethodName", ruleDescriptor.getJavaFuncionalIntefaceMethodName());
-	        ruleData.put("llmGeneratedLogic", generateLLMLogic(ruleDescriptor));
+	        ruleData.put("llmGeneratedLogic", generateLLMLogic(templateDescriptor, ruleDescriptor, entityDescriptor.getSystemPrompt()));
 	        
-	        // Adicionar os dados da regra à lista de regras
 	        rulesList.add(ruleData);
 	    }
 
 	    return rulesList;
 	}
 
-	private String generateLLMLogic(final RuleDescriptor ruleDescriptor) {
+	@SneakyThrows
+	private String generateLLMLogic(final TemplateDescriptor templateDescriptor, final RuleDescriptor ruleDescriptor, final String systemPrompt) {
+		
+		final String contentTemplate = Files.readString(Paths.get("templates/" + templateDescriptor.getTemplateName()));
+		
+		final SystemMessage systemMessage = new SystemMessage(systemPrompt);
+		final UserMessage userMessage = new UserMessage("template:" + contentTemplate + "\n" + "llmGeneratedLogic:" + ruleDescriptor.getLlmGeneratedLogic());
+		
+		final String block = openAiChatModel.call(systemMessage, userMessage);
+		
+		final int beginCode = block.lastIndexOf("```java") + 7;
+		final int endCode = block.indexOf("```", beginCode);
+		
+		final String code = beginCode > -1 && endCode > -1 ? block.substring(beginCode, endCode) : defaultCode(ruleDescriptor);
+		
+		log.info("m=generateLLMLogic, \"code generated: {}\"", code);
+		
+		return code;
+	}
 
+	private String defaultCode(final RuleDescriptor ruleDescriptor) {
+		
 		return ruleDescriptor.getRuleOutput().trim().toLowerCase().contains("void") ? "return;" : "return null;";
 	}
 

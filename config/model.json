@@ -26,13 +26,14 @@
       { "name": "preco", "type": "java.lang.Double", "required": true }
     ]
   },
+  "systemPrompt": "Você é um engenheiro de software Java especializado em Clean Code, SOLID, DDD e Arquitetura Hexagonal. Gere apenas o trecho de código solicitado, sem incluir definições de classe, imports ou comentários adicionais, e siga as melhores práticas de codificação. Gere apenas o corpo do método",
   "rulesDescriptor": [
   	{
 	    "ruleName": "CalcularDesconto${entityName}",
 	    "description":"calcular desconto de produtos",
 	    "ruleInput" : "${packageName}.domains.${entityName}Domain",
 	    "ruleOutput" : "java.lang.Double",
-	    "llmGeneratedLogic" : "se preço > 100.00 aplicar 10% de desconto",
+	    "llmGeneratedLogic" : "Implemente a lógica de desconto para o método `applyDiscount` que aplica um desconto de 10% caso o preço seja maior que 100. Retorne apenas o trecho de código necessário para a lógica, sem incluir definições de classe, imports ou comentários adicionais.",
 	    "javaFunctionalInterface": "java.util.function.Function",
 	    "javaFuncionalIntefaceMethodName": "apply"
   	},

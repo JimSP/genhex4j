@@ -3,6 +3,7 @@ package com.github.jimsp.genhex4j.configuration;
 import java.io.File;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
@@ -11,6 +12,7 @@ import lombok.SneakyThrows;
 @org.springframework.context.annotation.Configuration
 public class FreemarkerConfiguration {
 
+	@Primary
 	@Bean
 	@SneakyThrows
 	public Configuration freeMarkerConfig() {
