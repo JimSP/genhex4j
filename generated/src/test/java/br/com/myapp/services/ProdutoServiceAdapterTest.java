@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.Mockito.*;
 
-class ProdutoServiceAdapterTest {
+class ProdutoRuleAdapterTest {
 
     @Mock
     private ProdutoRepositoryPort repositoryPort;
@@ -39,10 +39,10 @@ class ProdutoServiceAdapterTest {
     void testFindById() {
         final ProdutoDomain domain = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         when(repositoryPort.findById(domain.getId())).thenReturn(Optional.of(domain));
@@ -60,10 +60,10 @@ class ProdutoServiceAdapterTest {
     void testSaveProduto() {
         final ProdutoDomain domain = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         when(repositoryPort.save(domain)).thenReturn(domain);
@@ -92,26 +92,26 @@ class ProdutoServiceAdapterTest {
     void testFindAllWithFilters() {
         final ProdutoDomain filterDomain = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         final ProdutoDomain domain1 = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         final ProdutoDomain domain2 = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         final List<ProdutoDomain> domainList = Arrays.asList(domain1, domain2);

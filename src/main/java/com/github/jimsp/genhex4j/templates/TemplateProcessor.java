@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jimsp.genhex4j.descriptors.AttributeDescriptor;
 import com.github.jimsp.genhex4j.descriptors.AttributeType;
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
+import com.github.jimsp.genhex4j.descriptors.RuleDescriptor;
 import com.github.jimsp.genhex4j.random.RandomValueGenerator;
 
 import freemarker.template.Configuration;
@@ -29,33 +32,55 @@ import lombok.extern.slf4j.Slf4j;
 public class TemplateProcessor {
 
 	Configuration freemarkerConfig;
-
+	
+	public List<TemplateDescriptor> loadTemplates(final Predicate<TemplateDescriptor> filter) {
+	    
+		try (final FileReader reader = new FileReader("config/template-config.json")) {
+	       
+			final ObjectMapper objectMapper = new ObjectMapper();
+	        final TemplateConfig config = objectMapper.readValue(reader, TemplateConfig.class);
+	        
+	        return config.getTemplates()
+	        		.stream()
+	                .filter(filter)
+	                .collect(Collectors.toList());
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return new ArrayList<>();
+	    }
+	}
 
 	@SneakyThrows
-	public void processTemplates(final EntityDescriptor entityDescriptor) {
-		final List<TemplateDescriptor> templates = loadTemplates();
+	public void processStandardTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor) {
 
 		for (final TemplateDescriptor templateDesc : templates) {
+			
 			final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor);
 			final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor);
 			generateFileFromTemplate(templateDesc.getTemplateName(), outputFileName, dataModel);
 		}
 	}
+	
+	@SneakyThrows
+	public void processRuleTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor) {
+		
+	    for (final TemplateDescriptor templateDesc : templates) {
+	        
+	    	final List<Map<String, Object>> rulesList = prepareRulesList(entityDescriptor);
 
-	private List<TemplateDescriptor> loadTemplates() {
-
-		try (final FileReader reader = new FileReader("config/template-config.json")) {
-			final ObjectMapper objectMapper = new ObjectMapper();
-			final TemplateConfig config = objectMapper.readValue(reader, TemplateConfig.class);
-			return config.getTemplates();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ArrayList<>();
-		}
+	        for (Map<String, Object> ruleData : rulesList) {
+	            
+	        	final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor, (String) ruleData.get("ruleName"));
+	        	final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor, ruleData);
+	            generateFileFromTemplate(templateDesc.getTemplateName(), outputFileName, dataModel);
+	        }
+	    }
 	}
 
 	private String resolveOutputFileName(final TemplateDescriptor templateDesc,
 			final EntityDescriptor entityDescriptor) {
+		
 		String outputPath = templateDesc.getOutputPathPattern();
 		final Map<String, String> placeholders = new HashMap<>();
 		placeholders.put("${packageName}", entityDescriptor.getPackageName().replace('.', '/'));
@@ -68,6 +93,21 @@ public class TemplateProcessor {
 		return outputPath;
 	}
 	
+	private String resolveOutputFileName(final TemplateDescriptor templateDesc, final EntityDescriptor entityDescriptor, final String ruleName) {
+	    
+		String outputPath = templateDesc.getOutputPathPattern();
+
+	    final Map<String, String> placeholders = new HashMap<>();
+	    placeholders.put("${packageName}", entityDescriptor.getPackageName().replace('.', '/'));
+	    placeholders.put("${entityName}", entityDescriptor.getEntityName());
+	    placeholders.put("${ruleName}", ruleName);
+
+	    for (final Map.Entry<String, String> entry : placeholders.entrySet()) {
+	        outputPath = outputPath.replace(entry.getKey(), entry.getValue());
+	    }
+
+	    return outputPath;
+	}
 
 	private Map<String, Object> prepareDataModel(final TemplateDescriptor templateDesc,
 			final EntityDescriptor entityDescriptor) {
@@ -88,7 +128,50 @@ public class TemplateProcessor {
 			dataModel.put("tableName", entityDescriptor.getJpaDescriptor().getTableName());
 		}
 
+		dataModel.put(null, attributes);
+
 		return dataModel;
+	}
+	
+	private Map<String, Object> prepareDataModel(final TemplateDescriptor templateDesc, final EntityDescriptor entityDescriptor, final Map<String, Object> ruleData) {
+	    
+		final Map<String, Object> dataModel = entityDescriptorToMap(entityDescriptor);
+
+	    if (templateDesc.getAdditionalData() != null) {
+	        dataModel.putAll(templateDesc.getAdditionalData());
+	    }
+
+	    dataModel.putAll(ruleData);
+
+	    replacePlaceholders(dataModel);
+
+	    return dataModel;
+	}
+	
+	private List<Map<String, Object>> prepareRulesList(final EntityDescriptor entityDescriptor) {
+	    
+		final List<Map<String, Object>> rulesList = new ArrayList<>();
+
+	    for (final RuleDescriptor ruleDescriptor : entityDescriptor.getRulesDescriptor()) {
+	        Map<String, Object> ruleData = new HashMap<>();
+	        ruleData.put("ruleName", ruleDescriptor.getRuleName());
+	        ruleData.put("ruleInput", ruleDescriptor.getRuleInput());
+	        ruleData.put("ruleOutput", ruleDescriptor.getRuleOutput());
+	        ruleData.put("additionalInput", ruleDescriptor.getRuleAdditionalInput());
+	        ruleData.put("javaFunctionalInterface", ruleDescriptor.getJavaFunctionalInterface());
+	        ruleData.put("javaFuncionalIntefaceMethodName", ruleDescriptor.getJavaFuncionalIntefaceMethodName());
+	        ruleData.put("llmGeneratedLogic", generateLLMLogic(ruleDescriptor));
+	        
+	        // Adicionar os dados da regra à lista de regras
+	        rulesList.add(ruleData);
+	    }
+
+	    return rulesList;
+	}
+
+	private String generateLLMLogic(final RuleDescriptor ruleDescriptor) {
+
+		return ruleDescriptor.getRuleOutput().trim().toLowerCase().contains("void") ? "return;" : "return null;";
 	}
 
 	public void generateFileFromTemplate(final String templateName,
@@ -125,6 +208,7 @@ public class TemplateProcessor {
 	    map.put("dtoDescriptor", entityDescriptor.getDtoDescriptor());
 	    map.put("jpaDescriptor", entityDescriptor.getJpaDescriptor());
 	    map.put("attributesMap", entityDescriptor.getAttributesMap());
+	    map.put("rulesDescriptor", entityDescriptor.getRulesDescriptor());
 	    
 	    return map;
 	}

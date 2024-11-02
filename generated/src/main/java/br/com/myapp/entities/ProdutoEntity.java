@@ -1,5 +1,6 @@
 package br.com.myapp.entities;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 @Data
-@Builder
+@Builder(access = AccessLevel.PUBLIC, toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -18,11 +19,11 @@ public class ProdutoEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id")
-        private Long id;
+        private java.lang.Long id;
         @Column(name = "nome", columnDefinition = "VARCHAR(100)")
-        private String nome;
+        private java.lang.String nome;
         @Column(name = "descricao")
-        private String descricao;
+        private java.lang.String descricao;
         @Column(name = "preco")
-        private Double preco;
+        private java.lang.Double preco;
 }

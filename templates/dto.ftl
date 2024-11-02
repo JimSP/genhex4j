@@ -10,7 +10,7 @@ import lombok.Value;
 import jakarta.validation.constraints.*;
 
 @Value
-@Builder(access = AccessLevel.PUBLIC)
+@Builder(access = AccessLevel.PUBLIC, toBuilder = true)
 @JsonDeserialize(builder = ${entityName}DTO.${entityName}DTOBuilder.class)
 public class ${entityName}DTO {
 

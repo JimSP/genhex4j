@@ -3,27 +3,47 @@
   "entityName": "Produto",
   "domainDescriptor": {
     "attributes": [
-      { "name": "id", "type": "Long" },
-      { "name": "nome", "type": "String" },
-      { "name": "descricao", "type": "String" },
-      { "name": "preco", "type": "Double" }
+      { "name": "id", "type": "java.lang.Long" },
+      { "name": "nome", "type": "java.lang.String" },
+      { "name": "descricao", "type": "java.lang.String" },
+      { "name": "preco", "type": "java.lang.Double" }
     ]
   },
   "dtoDescriptor": {
     "attributes": [
-      { "name": "id", "type": "Long" },
-      { "name": "nome", "type": "String", "required": true, "maxLength": 100 },
-      { "name": "descricao", "type": "String", "required": true },
-      { "name": "preco", "type": "Double" }
+      { "name": "id", "type": "java.lang.Long" },
+      { "name": "nome", "type": "java.lang.String", "required": true, "maxLength": 100 },
+      { "name": "descricao", "type": "java.lang.String", "required": true },
+      { "name": "preco", "type": "java.lang.Double" }
     ]
   },
   "jpaDescriptor": {
     "tableName": "produtos",
     "attributes": [
-      { "name": "id", "type": "Long", "primaryKey": true, "generatedValue": true },
-      { "name": "nome", "type": "String", "columnDefinition": "VARCHAR(100)", "required": true},
-      { "name": "descricao", "type": "String", "required": true },
-      { "name": "preco", "type": "Double", "required": true }
+      { "name": "id", "type": "java.lang.Long", "primaryKey": true, "generatedValue": true },
+      { "name": "nome", "type": "java.lang.String", "columnDefinition": "VARCHAR(100)", "required": true},
+      { "name": "descricao", "type": "java.lang.String", "required": true },
+      { "name": "preco", "type": "java.lang.Double", "required": true }
     ]
-  }
+  },
+  "rulesDescriptor": [
+  	{
+	    "ruleName": "CalcularDesconto${entityName}",
+	    "description":"calcular desconto de produtos",
+	    "ruleInput" : "${packageName}.domains.${entityName}Domain",
+	    "ruleOutput" : "java.lang.Double",
+	    "llmGeneratedLogic" : "se preço > 100.00 aplicar 10% de desconto",
+	    "javaFunctionalInterface": "java.util.function.Function",
+	    "javaFuncionalIntefaceMethodName": "apply"
+  	},
+  	{
+	    "ruleName": "Despachar${entityName}",
+	    "description":"despachar produtos para entrega",
+	    "ruleInput" : "${packageName}.domains.${entityName}Domain",
+	    "ruleOutput" : "java.lang.Void",
+	    "llmGeneratedLogic" : "System.out.println(domain)",
+	    "javaFunctionalInterface": "java.util.function.Consumer",
+	    "javaFuncionalIntefaceMethodName": "accept"
+  	}
+  ]
 }

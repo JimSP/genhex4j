@@ -1,13 +1,10 @@
 package ${packageName}.controllers;
 
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import lombok.AllArgsConstructor;
 
@@ -27,7 +24,7 @@ public class ${entityName}Controller {
     private final ${entityName}DomainToDTOConverter domainToDtoConverter;
 
 	@GetMapping("/search")
-	public ResponseEntity<Page<${entityName}DTO>> search${entityName}(final ${entityName}DTO dto, final PageRequest pageable) {
+	public ResponseEntity<Page<${entityName}DTO>> search${entityName}(final ${entityName}DTO dto, final Pageable pageable) {
 	    final ${entityName}Domain domain = dtoToDomainConverter.convert(dto);
 	    final Page<${entityName}Domain> domainsPage = service.searchWithFilters(domain, pageable);
 	    final Page<${entityName}DTO> dtosPage = domainsPage.map(domainToDtoConverter::convert);

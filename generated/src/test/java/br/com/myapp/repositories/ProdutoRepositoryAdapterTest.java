@@ -1,33 +1,26 @@
 
 package br.com.myapp.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Optional;
+import br.com.myapp.domains.ProdutoDomain;
+import br.com.myapp.entities.ProdutoEntity;
+import br.com.myapp.converters.ProdutoDomainToJPAConverter;
+import br.com.myapp.converters.ProdutoJPAToDomainConverter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import br.com.myapp.converters.ProdutoDomainToDTOConverter;
-import br.com.myapp.converters.ProdutoDomainToJPAConverter;
-import br.com.myapp.converters.ProdutoJPAToDomainConverter;
-import br.com.myapp.domains.ProdutoDomain;
-import br.com.myapp.entities.ProdutoEntity;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ProdutoRepositoryAdapterTest {
 
@@ -39,9 +32,6 @@ class ProdutoRepositoryAdapterTest {
 
     @Mock
     private ProdutoJPAToDomainConverter entityToDomainConverter;
-    
-    @Mock
-    private ProdutoDomainToDTOConverter domainToDTOConverter;
 
     @InjectMocks
     private ProdutoRepositoryAdapter produtoRepositoryAdapter;
@@ -57,10 +47,10 @@ class ProdutoRepositoryAdapterTest {
         final ProdutoEntity entity = new ProdutoEntity(
         );
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
 
         when(repository.findById(id)).thenReturn(Optional.of(entity));
@@ -75,10 +65,10 @@ class ProdutoRepositoryAdapterTest {
     @Test
     void testSave() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
         final ProdutoEntity entity = new ProdutoEntity(
         );
@@ -107,35 +97,32 @@ class ProdutoRepositoryAdapterTest {
     @Test
     void testSearchWithFilters() {
         final ProdutoDomain filterDomain = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
-        
         final Pageable pageable = Pageable.unpaged();
 
-        final ProdutoEntity entity1 = new ProdutoEntity();
-        entity1.setId(1L);
-        
-        final ProdutoEntity entity2 = new ProdutoEntity();
-        entity2.setId(2L);
+        final ProdutoEntity entity1 = new ProdutoEntity(
+        );
+        final ProdutoEntity entity2 = new ProdutoEntity(
+        );
 
         final List<ProdutoEntity> entities = List.of(entity1, entity2);
         final Page<ProdutoEntity> entityPage = new PageImpl<>(entities);
 
         final ProdutoDomain domain1 = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
-        
         final ProdutoDomain domain2 = ProdutoDomain.builder()
-                .id(2L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
 
         when(repository.findAll(any(), eq(pageable))).thenReturn(entityPage);

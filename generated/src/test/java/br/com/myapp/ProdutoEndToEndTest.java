@@ -43,10 +43,10 @@ class ProdutoEndToEndTest {
     @Test
     void testCreateProdutoAndRetrieveById() throws Exception {
         final ProdutoDTO produtoDTO = ProdutoDTO.builder()
-            .id(1L)
-            .nome("Example String")
-            .descricao("Example String")
-            .preco(10.5)
+            .id(null)
+            .nome(null)
+            .descricao(null)
+            .preco(null)
             .build();
 
         final String response = mockMvc.perform(post("/api/produtos")
@@ -81,18 +81,18 @@ class ProdutoEndToEndTest {
     @Test
     void testUpdateProdutoAndVerifyChanges() throws Exception {
         final ProdutoEntity produtoEntity = new ProdutoEntity();
-        produtoEntity.setId(1L);
-        produtoEntity.setNome("Example String");
-        produtoEntity.setDescricao("Example String");
-        produtoEntity.setPreco(10.5);
+        produtoEntity.setId(null);
+        produtoEntity.setNome(null);
+        produtoEntity.setDescricao(null);
+        produtoEntity.setPreco(null);
         final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
         final ProdutoDTO updatedDTO = ProdutoDTO.builder()
             .id(produtoSavedEntity.getId())
-            .id(1L)
-            .nome("Example String")
-            .descricao("Example String")
-            .preco(10.5)
+            .id(null)
+            .nome(null)
+            .descricao(null)
+            .preco(null)
             .build();
 
         mockMvc.perform(put("/api/produtos/" + produtoSavedEntity.getId())
@@ -111,10 +111,10 @@ class ProdutoEndToEndTest {
     @Test
     void testDeleteProdutoAndVerifyRemoval() throws Exception {
         final ProdutoEntity produtoEntity = new ProdutoEntity();
-        produtoEntity.setId(1L);
-        produtoEntity.setNome("Example String");
-        produtoEntity.setDescricao("Example String");
-        produtoEntity.setPreco(10.5);
+        produtoEntity.setId(null);
+        produtoEntity.setNome(null);
+        produtoEntity.setDescricao(null);
+        produtoEntity.setPreco(null);
         final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
         mockMvc.perform(delete("/api/produtos/" + produtoSavedEntity.getId()))
@@ -127,10 +127,10 @@ class ProdutoEndToEndTest {
     @Test
     void testSearchProdutoWithFilters() throws Exception {
         final ProdutoEntity produtoEntity = new ProdutoEntity();
-        produtoEntity.setId(1L);
-        produtoEntity.setNome("Example String");
-        produtoEntity.setDescricao("Example String");
-        produtoEntity.setPreco(10.5);
+        produtoEntity.setId(null);
+        produtoEntity.setNome(null);
+        produtoEntity.setDescricao(null);
+        produtoEntity.setPreco(null);
         
         final ProdutoEntity produtoSavedEntity = produtoRepository.save(produtoEntity);
 
@@ -167,10 +167,10 @@ class ProdutoEndToEndTest {
     void testUpdateProdutoAndVerifyNotFound() throws Exception {
 
     	 final ProdutoDTO updatedDTO = ProdutoDTO.builder()
-            .id(1L)
-            .nome("Example String")
-            .descricao("Example String")
-            .preco(10.5)
+            .id(null)
+            .nome(null)
+            .descricao(null)
+            .preco(null)
             .build();
 
         mockMvc.perform(put("/api/produtos/-1")

@@ -1,5 +1,6 @@
 package ${packageName}.entities;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 @Data
-@Builder
+@Builder(access = AccessLevel.PUBLIC, toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

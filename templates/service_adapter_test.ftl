@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.Mockito.*;
 
-class ${entityName}ServiceAdapterTest {
+class ${entityName}RuleAdapterTest {
 
     @Mock
     private ${entityName}RepositoryPort repositoryPort;

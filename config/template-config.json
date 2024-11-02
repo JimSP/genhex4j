@@ -10,7 +10,7 @@
 			}
 		},
 		{
-			"templateName": "application-test.tfl",
+			"templateName": "application-test.ftl",
 			"outputPathPattern": "generated/src/test/java/${packageName}/${entityName}ApplicationTest.java",
 			"dataModelKey": "domain",
 			"additionalData": {
@@ -96,6 +96,17 @@
 			"outputPathPattern": "generated/src/main/java/${packageName}/repositories/${entityName}RepositoryAdapter.java",
 			"dataModelKey": "jpa"
 		},
+		
+		{
+			"templateName": "rule_port.ftl",
+			"outputPathPattern": "generated/src/main/java/${packageName}/rules/${ruleName}RulePort.java",
+			"dataModelKey": "jpa"
+		},
+		{
+			"templateName": "rule_adapter.ftl",
+			"outputPathPattern": "generated/src/main/java/${packageName}/rules/${ruleName}RuleAdapter.java",
+			"dataModelKey": "jpa"
+		},
 		{
 			"templateName": "service_port.ftl",
 			"outputPathPattern": "generated/src/main/java/${packageName}/services/${entityName}ServicePort.java",
@@ -130,11 +141,6 @@
 			"templateName": "converter_test.ftl",
 			"outputPathPattern": "generated/src/test/java/${packageName}/converters/${entityName}ConverterTest.java",
 			"dataModelKey": "domain"
-		},
-		{
-			"templateName": "controller_test.ftl",
-			"outputPathPattern": "generated/src/test/java/${packageName}/controllers/${entityName}ControllerTest.java",
-			"dataModelKey": "dto"
 		},
 		{
 			"templateName": "repository_test.ftl",

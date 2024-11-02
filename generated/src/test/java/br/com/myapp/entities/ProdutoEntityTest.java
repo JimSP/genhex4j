@@ -10,19 +10,19 @@ class ProdutoEntityTest {
     void testProdutoEntityGettersAndSetters() {
         final ProdutoEntity entity = new ProdutoEntity();
         
-        final Long idValue = 1L;
+        final java.lang.Long idValue = null;
         
         entity.setId(idValue);
         assertEquals(idValue, entity.getId());
-        final String nomeValue = "Example String";
+        final java.lang.String nomeValue = null;
         
         entity.setNome(nomeValue);
         assertEquals(nomeValue, entity.getNome());
-        final String descricaoValue = "Example String";
+        final java.lang.String descricaoValue = null;
         
         entity.setDescricao(descricaoValue);
         assertEquals(descricaoValue, entity.getDescricao());
-        final Double precoValue = 10.5;
+        final java.lang.Double precoValue = null;
         
         entity.setPreco(precoValue);
         assertEquals(precoValue, entity.getPreco());

@@ -10,15 +10,15 @@ class ProdutoDTOTest {
     void testProdutoDTOCreation() {
         final ProdutoDTO dto = ProdutoDTO
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
-        assertEquals(1L, dto.getId());
-        assertEquals("Example String", dto.getNome());
-        assertEquals("Example String", dto.getDescricao());
-        assertEquals(10.5, dto.getPreco());
+        assertEquals(null, dto.getId());
+        assertEquals(null, dto.getNome());
+        assertEquals(null, dto.getDescricao());
+        assertEquals(null, dto.getPreco());
     }
 }

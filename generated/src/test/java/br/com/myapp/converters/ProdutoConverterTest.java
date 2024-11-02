@@ -28,10 +28,10 @@ class ProdutoConverterTest {
     @Test
     void testDtoToDomainConversion() {
         final ProdutoDTO dto = ProdutoDTO.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
 
         final ProdutoDomain domain = dtoToDomainConverter.convert(dto);
@@ -45,10 +45,10 @@ class ProdutoConverterTest {
     @Test
     void testDomainToDtoConversion() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
 
         final ProdutoDTO dto = domainToDTOConverter.convert(domain);
@@ -62,10 +62,10 @@ class ProdutoConverterTest {
     @Test
     void testEntityToDomainConversion() {
         final ProdutoEntity entity = new ProdutoEntity();
-        entity.setId(1L);
-        entity.setNome("Example String");
-        entity.setDescricao("Example String");
-        entity.setPreco(10.5);
+        entity.setId(null);
+        entity.setNome(null);
+        entity.setDescricao(null);
+        entity.setPreco(null);
 
         final ProdutoDomain domain = jpaToDomainConverter.convert(entity);
 
@@ -78,10 +78,10 @@ class ProdutoConverterTest {
     @Test
     void testDomainToEntityConversion() {
         final ProdutoDomain domain = ProdutoDomain.builder()
-                .id(1L)
-                .nome("Example String")
-                .descricao("Example String")
-                .preco(10.5)
+                .id(null)
+                .nome(null)
+                .descricao(null)
+                .preco(null)
             .build();
 
         final ProdutoEntity entity = domainToJPAConverter.convert(domain);

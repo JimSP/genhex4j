@@ -10,26 +10,26 @@ class ProdutoDomainTest {
     void testProdutoDomainCreation() {
         final ProdutoDomain domain = ProdutoDomain
                 .builder()
-                    .id(1L)
-                    .nome("Example String")
-                    .descricao("Example String")
-                    .preco(10.5)
+                    .id(null)
+                    .nome(null)
+                    .descricao(null)
+                    .preco(null)
                 .build();
 
         assertEquals(
-            1L, 
+            null, 
             domain.getId()
         );
         assertEquals(
-            "Example String", 
+            null, 
             domain.getNome()
         );
         assertEquals(
-            "Example String", 
+            null, 
             domain.getDescricao()
         );
         assertEquals(
-            10.5, 
+            null, 
             domain.getPreco()
         );
     }

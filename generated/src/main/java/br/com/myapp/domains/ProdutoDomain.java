@@ -5,11 +5,11 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder(access = AccessLevel.PUBLIC)
+@Builder(access = AccessLevel.PUBLIC, toBuilder = true)
 public class ProdutoDomain {
 
-    Long id;
-    String nome;
-    String descricao;
-    Double preco;
+    java.lang.Long id;
+    java.lang.String nome;
+    java.lang.String descricao;
+    java.lang.Double preco;
 }
