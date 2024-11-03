@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TemplateProcessor {
 
-	Configuration freemarkerConfig;
 	OpenAiChatModel openAiChatModel;
 	FileSystem inMemoryFileSystem;
 	
@@ -59,18 +58,18 @@ public class TemplateProcessor {
 	}
 
 	@SneakyThrows
-	public void processStandardTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
+	public void processStandardTemplates(final Configuration freemakerConfiguration, final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
 
 		for (final TemplateDescriptor templateDesc : templates) {
 			
 			final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor);
 			final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor);
-			generateFileFromTemplate(fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
+			generateFileFromTemplate(freemakerConfiguration, fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
 		}
 	}
 	
 	@SneakyThrows
-	public void processRuleTemplates(final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
+	public void processRuleTemplates(final Configuration freemakerConfiguration, final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
 		
 	    for (final TemplateDescriptor templateDesc : templates) {
 	        
@@ -80,7 +79,7 @@ public class TemplateProcessor {
 	            
 	        	final String outputFileName = resolveOutputFileName(templateDesc, entityDescriptor, (String) ruleData.get("ruleName"));
 	        	final Map<String, Object> dataModel = prepareDataModel(templateDesc, entityDescriptor, ruleData);
-	            generateFileFromTemplate(fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
+	            generateFileFromTemplate(freemakerConfiguration, fileSystemIdentifier, templateDesc.getTemplateName(), outputFileName, dataModel);
 	        }
 	    }
 	}
@@ -201,7 +200,8 @@ public class TemplateProcessor {
 	}
 
 	@SneakyThrows
-	private void generateFileFromTemplate(final Path fileSystemIdentifier,
+	private void generateFileFromTemplate(final Configuration freemakerConfiguration,
+										  final Path fileSystemIdentifier,
 										  final String templateName,
 	                                      final String outputFileName, 
 	                                      final Map<String, Object> dataModel) {
@@ -214,7 +214,7 @@ public class TemplateProcessor {
 	    }
 
 	    try (final BufferedWriter writer = Files.newBufferedWriter(outputFilePath)) {
-	        final Template template = freemarkerConfig.getTemplate(templateName);
+	        final Template template = freemakerConfiguration.getTemplate(templateName);
 	        template.process(dataModel, writer);
 	        log.info("Created {} with template {}", outputFileName, templateName);
 	    } catch (Exception e) {

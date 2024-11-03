@@ -29,5 +29,11 @@ public class Genhex4jDTO {
 	
 	@JsonProperty
 	@NotNull
+	@NotEmpty
     List<@NotNull TemplateDescriptor> rulesTemplates;
+	
+	@JsonProperty
+	@NotNull
+	@NotEmpty
+	List<@NotNull TemplateDTO> templates;
 }
