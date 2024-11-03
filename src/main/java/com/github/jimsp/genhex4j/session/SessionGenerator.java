@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
@@ -32,7 +33,7 @@ public class SessionGenerator {
 	ZipGenerator zipGenerator;
 
 	@SneakyThrows
-    public byte[] execute(final EntityDescriptor entityDescriptor, final List<TemplateDTO> templates, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
+    public Pair<String, byte[]> execute(final EntityDescriptor entityDescriptor, final List<TemplateDTO> templates, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
 		
 		final String fileSystemIdentifierString = UUID.randomUUID().toString();
 		final Path fileSystemIdentifier = inMemoryFileSystem.getPath(fileSystemIdentifierString);
@@ -47,7 +48,7 @@ public class SessionGenerator {
         templateProcessor.processStandardTemplates(freemakerConfiguration, standardTemplates, entityDescriptor, fileSystemIdentifier); 
         templateProcessor.processRuleTemplates(freemakerConfiguration, ruleTemplates, entityDescriptor, fileSystemIdentifier);
         
-        return zipGenerator.createZip(fileSystemIdentifier);
+        return Pair.of(fileSystemIdentifierString, zipGenerator.createZip(fileSystemIdentifier));
     }
 	
 	@SneakyThrows
