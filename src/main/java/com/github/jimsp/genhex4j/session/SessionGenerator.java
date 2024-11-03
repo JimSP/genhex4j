@@ -1,9 +1,11 @@
 package com.github.jimsp.genhex4j.session;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,14 +35,16 @@ public class SessionGenerator {
 	@SneakyThrows
     public byte[] execute(final EntityDescriptor entityDescriptor, final List<TemplateDTO> templates, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
 		
-		final Configuration freemakerConfiguration = freemakerConfiguration(templates);
-		final Path fileSystemIdentifier = inMemoryFileSystem.getPath(UUID.randomUUID().toString());
+		final String fileSystemIdentifierString = UUID.randomUUID().toString();
+		final Path fileSystemIdentifier = inMemoryFileSystem.getPath(fileSystemIdentifierString);
 		
 		if(!Files.exists(fileSystemIdentifier)) {
-	    	Files.createDirectories(fileSystemIdentifier);
+	    	createDirectories(fileSystemIdentifier);
 	    	log.info("m=generateFileFromTemplate, msg=\"created root directory {}\"", fileSystemIdentifier);
 	    }
-        
+		
+		final Configuration freemakerConfiguration = freemakerConfiguration(fileSystemIdentifierString, templates);
+		
         templateProcessor.processStandardTemplates(freemakerConfiguration, standardTemplates, entityDescriptor, fileSystemIdentifier); 
         templateProcessor.processRuleTemplates(freemakerConfiguration, ruleTemplates, entityDescriptor, fileSystemIdentifier);
         
@@ -48,7 +52,31 @@ public class SessionGenerator {
     }
 	
 	@SneakyThrows
-	private Configuration freemakerConfiguration(final List<TemplateDTO> templates) {
+	private Configuration freemakerConfiguration(final String fileSystemIdentifier, final List<TemplateDTO> templates) {
+		
+		final Path path = Paths.get(fileSystemIdentifier);
+		
+		if(!Files.exists(path)) {
+			
+			createDirectories(path);
+		}
+		
+		templates.forEach(template->{
+			
+			final String fileName = template.getName();
+			
+			final Path outputFilePath = path.resolve(fileName);
+		    final Path parentDir = outputFilePath.getParent();
+
+		    if (!Files.exists(parentDir)) {
+		        createDirectories(parentDir);
+		    }
+			
+			final String content = template.getContent();
+			
+			write(fileName, content);
+		});
+		
 		final Configuration freemakerConfiguration = new Configuration(Configuration.VERSION_2_3_33);
 
 		freemakerConfiguration.setDirectoryForTemplateLoading(new File("templates"));
@@ -59,5 +87,21 @@ public class SessionGenerator {
 		freemakerConfiguration.setWrapUncheckedExceptions(true);
 
 		return freemakerConfiguration;
+	}
+
+	@SneakyThrows
+	private Path createDirectories(final Path parentDir) {
+		return Files.createDirectories(parentDir);
+	}
+
+	@SneakyThrows
+	private Path write(final String fileName, final String content) {
+		final Path path = Paths.get(fileName);
+		
+		if(!Files.exists(path)) {
+			Files.createFile(path);
+		}
+		
+		return Files.writeString(path, content);
 	}
 }
