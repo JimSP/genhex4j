@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder(access = AccessLevel.PUBLIC)
+@Builder(access = AccessLevel.PUBLIC, toBuilder = true)
 @JsonDeserialize(builder = EntityDescriptor.EntityDescriptorBuilder.class) 
 public class EntityDescriptor {
 	

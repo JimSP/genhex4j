@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
 import com.github.jimsp.genhex4j.templates.TemplateDescriptor;
@@ -18,7 +18,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 @Value
-@Component
+@Service
 @Slf4j
 public class SessionGenerator {
 
@@ -27,7 +27,7 @@ public class SessionGenerator {
 	ZipGenerator zipGenerator;
 
 	@SneakyThrows
-    public byte[] execute(final EntityDescriptor entityDescriptor) {
+    public byte[] execute(final EntityDescriptor entityDescriptor, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
 		
 		final Path fileSystemIdentifier = inMemoryFileSystem.getPath(UUID.randomUUID().toString());
 		
@@ -35,11 +35,8 @@ public class SessionGenerator {
 	    	Files.createDirectories(fileSystemIdentifier);
 	    	log.info("m=generateFileFromTemplate, msg=\"created root directory {}\"", fileSystemIdentifier);
 	    }
-        
-        final List<TemplateDescriptor> standardTemplates = templateProcessor.loadTemplates(template -> !template.getTemplateName().contains("rule"));
-        templateProcessor.processStandardTemplates(standardTemplates, entityDescriptor, fileSystemIdentifier);
-        
-        final List<TemplateDescriptor> ruleTemplates = templateProcessor.loadTemplates(template -> template.getTemplateName().contains("rule"));
+         
+        templateProcessor.processStandardTemplates(standardTemplates, entityDescriptor, fileSystemIdentifier); 
         templateProcessor.processRuleTemplates(ruleTemplates, entityDescriptor, fileSystemIdentifier);
         
         return zipGenerator.createZip(fileSystemIdentifier);
