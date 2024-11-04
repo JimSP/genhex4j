@@ -36,4 +36,6 @@ public class Genhex4jDTO {
 	@NotNull
 	@NotEmpty
 	List<@NotNull TemplateDTO> templates;
+	
+	
 }

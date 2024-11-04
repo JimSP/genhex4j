@@ -46,14 +46,13 @@ public class Genhex4jController {
         final List<TemplateDescriptor> rulesTemplates = templateProcessor.loadTemplates(template -> template.getTemplateName().contains("rule"));
 		
 		return ResponseEntity
-				.ok(
-				Genhex4jDTO
-					.builder()
-					.entityDescriptor(entityDescriptor)
-					.standardTemplates(standardTemplates)
-					.rulesTemplates(rulesTemplates)
-					.templates(templates)
-					.build());
+				.ok(Genhex4jDTO
+						.builder()
+						.entityDescriptor(entityDescriptor)
+						.standardTemplates(standardTemplates)
+						.rulesTemplates(rulesTemplates)
+						.templates(templates)
+						.build());
 		
 	}
 
