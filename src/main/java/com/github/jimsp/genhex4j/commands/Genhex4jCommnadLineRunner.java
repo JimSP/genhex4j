@@ -4,9 +4,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.stereotype.Component;
 
 import com.github.jimsp.genhex4j.descriptors.DescriptorReader;
@@ -30,20 +34,36 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 	DescriptorReader descriptorReader;
 	TemplateProcessor templateProcessor;
 	Loader loader;
+	WebApplicationType webApplicationType;
 
 	@Override
     public void run(String... args) throws Exception {
-		
-		final List<TemplateDTO> templates = loader.execute();
-		final EntityDescriptor entityDescriptor = descriptorReader.readDescriptor();
-		final List<TemplateDescriptor> standardTemplates = templateProcessor.loadTemplates(template -> !template.getTemplateName().contains("rule"));
-        final List<TemplateDescriptor> rulesTemplates = templateProcessor.loadTemplates(template -> template.getTemplateName().contains("rule"));
-		
-		final Pair<String, byte[]> genhex4j = sessionGenerator.execute(entityDescriptor, templates, standardTemplates, rulesTemplates);
-		
-		saveZipFile(genhex4j.getValue(), Paths.get(genhex4j.getKey() + "-genhex4j.zip"));
+
+		Optional
+			.of(webApplicationType)
+			.filter(filter())
+			.ifPresent(action());
+
     }
 
+	private Predicate<? super WebApplicationType> filter() {
+		return predicate-> predicate == WebApplicationType.NONE;
+	}
+
+	private Consumer<? super WebApplicationType> action() {
+		
+		return action->{
+		
+			final List<TemplateDTO> templates = loader.execute();
+			final EntityDescriptor entityDescriptor = descriptorReader.readDescriptor();
+			final List<TemplateDescriptor> standardTemplates = templateProcessor.loadTemplates(template -> !template.getTemplateName().contains("rule"));
+	        final List<TemplateDescriptor> rulesTemplates = templateProcessor.loadTemplates(template -> template.getTemplateName().contains("rule"));
+			
+			final Pair<String, byte[]> genhex4j = sessionGenerator.execute(entityDescriptor, templates, standardTemplates, rulesTemplates);
+			
+			saveZipFile(genhex4j.getValue(), Paths.get(genhex4j.getKey() + "-genhex4j.zip"));
+		};
+	}
 	
 	@SneakyThrows
 	private void saveZipFile(final byte[] zipContent, final Path destinationPath) {
