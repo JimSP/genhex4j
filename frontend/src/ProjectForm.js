@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Form, Button, ProgressBar, Alert, Spinner, Modal } from 'react-bootstrap';
 
 const ApiForm = () => {
   const [formData, setFormData] = useState({
@@ -24,27 +25,75 @@ const ApiForm = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const totalSteps = 3;
 
   useEffect(() => {
-    // Simula a chamada da API e o preenchimento dos dados no estado
     const fetchInitialData = async () => {
+      setIsFetching(true);
       try {
         const response = await fetch('http://localhost:8080/');
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
-        
-        // Preenche o estado com os dados da API
+
         setFormData(data);
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsFetching(false);
       }
     };
 
     fetchInitialData();
   }, []);
 
+  const validateStep = () => {
+    let stepErrors = {};
+    if (currentStep === 1) {
+      if (!formData.entityDescriptor.packageName) {
+        stepErrors.packageName = 'O nome do pacote é obrigatório.';
+      }
+      if (!formData.entityDescriptor.entityName) {
+        stepErrors.entityName = 'O nome da entidade é obrigatório.';
+      }
+      if (!formData.entityDescriptor.systemPrompt) {
+        stepErrors.systemPrompt = 'O prompt do sistema é obrigatório.';
+      }
+    } else if (currentStep === 2) {
+      if (!formData.entityDescriptor.jpaDescriptor.tableName) {
+        stepErrors.tableName = 'O nome da tabela é obrigatório.';
+      }
+      if (formData.entityDescriptor.jpaDescriptor.attributes.length === 0) {
+        stepErrors.attributes = 'Adicione pelo menos um atributo.';
+      } else {
+        formData.entityDescriptor.jpaDescriptor.attributes.forEach((attr, index) => {
+          if (!attr.name || !attr.type) {
+            stepErrors[`attribute_${index}`] = 'Nome e tipo são obrigatórios.';
+          }
+        });
+      }
+    } else if (currentStep === 3) {
+      // Validação das regras
+      if (formData.entityDescriptor.rulesDescriptor.length === 0) {
+        stepErrors.rules = 'Adicione pelo menos uma regra.';
+      } else {
+        formData.entityDescriptor.rulesDescriptor.forEach((rule, index) => {
+          if (!rule.ruleName || !rule.description) {
+            stepErrors[`rule_${index}`] = 'Nome e descrição da regra são obrigatórios.';
+          }
+        });
+      }
+    }
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: null }));
     if (name === 'tableName') {
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -67,33 +116,59 @@ const ApiForm = () => {
     }
   };
 
-  const handleAddAttribute = (descriptor) => {
+  const handleAddAttribute = () => {
+    const initializeAttribute = () => ({ name: '', type: '' });
     setFormData((prevFormData) => ({
       ...prevFormData,
       entityDescriptor: {
         ...prevFormData.entityDescriptor,
-        [descriptor]: {
-          ...prevFormData.entityDescriptor[descriptor],
+        jpaDescriptor: {
+          ...prevFormData.entityDescriptor.jpaDescriptor,
           attributes: [
-            ...prevFormData.entityDescriptor[descriptor].attributes,
-            { name: '', type: '' }
+            ...prevFormData.entityDescriptor.jpaDescriptor.attributes,
+            initializeAttribute()
+          ]
+        },
+        domainDescriptor: {
+          ...prevFormData.entityDescriptor.domainDescriptor,
+          attributes: [
+            ...prevFormData.entityDescriptor.domainDescriptor.attributes,
+            initializeAttribute()
+          ]
+        },
+        dtoDescriptor: {
+          ...prevFormData.entityDescriptor.dtoDescriptor,
+          attributes: [
+            ...prevFormData.entityDescriptor.dtoDescriptor.attributes,
+            initializeAttribute()
           ]
         }
       }
     }));
   };
 
-  const handleRemoveAttribute = (descriptor, index) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      entityDescriptor: {
-        ...prevFormData.entityDescriptor,
-        [descriptor]: {
-          ...prevFormData.entityDescriptor[descriptor],
-          attributes: prevFormData.entityDescriptor[descriptor].attributes.filter((_, i) => i !== index)
+  const handleRemoveAttribute = (index) => {
+    setFormData((prevFormData) => {
+      const removeAt = (arr) => arr.filter((_, i) => i !== index);
+      return {
+        ...prevFormData,
+        entityDescriptor: {
+          ...prevFormData.entityDescriptor,
+          jpaDescriptor: {
+            ...prevFormData.entityDescriptor.jpaDescriptor,
+            attributes: removeAt(prevFormData.entityDescriptor.jpaDescriptor.attributes)
+          },
+          domainDescriptor: {
+            ...prevFormData.entityDescriptor.domainDescriptor,
+            attributes: removeAt(prevFormData.entityDescriptor.domainDescriptor.attributes)
+          },
+          dtoDescriptor: {
+            ...prevFormData.entityDescriptor.dtoDescriptor,
+            attributes: removeAt(prevFormData.entityDescriptor.dtoDescriptor.attributes)
+          }
         }
-      }
-    }));
+      };
+    });
   };
 
   const handleAddRule = () => {
@@ -128,7 +203,9 @@ const ApiForm = () => {
   };
 
   const handleNextStep = () => {
-    setCurrentStep(currentStep + 1);
+    if (validateStep()) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handlePreviousStep = () => {
@@ -145,210 +222,332 @@ const ApiForm = () => {
         rulesDescriptor: newRules
       }
     }));
+
+    setErrors((prevErrors) => ({ ...prevErrors, [`rule_${index}`]: null }));
   };
 
   const handleJpaAttributeChange = (index, field, value) => {
-    const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
-    newAttributes[index][field] = value;
+    const updateAttributes = (attributes) =>
+      attributes.map((attr, i) => (i === index ? { ...attr, [field]: value } : attr));
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       entityDescriptor: {
         ...prevFormData.entityDescriptor,
         jpaDescriptor: {
           ...prevFormData.entityDescriptor.jpaDescriptor,
-          attributes: newAttributes
+          attributes: updateAttributes(prevFormData.entityDescriptor.jpaDescriptor.attributes)
         },
         domainDescriptor: {
           ...prevFormData.entityDescriptor.domainDescriptor,
-          attributes: newAttributes
+          attributes: updateAttributes(prevFormData.entityDescriptor.domainDescriptor.attributes)
         },
         dtoDescriptor: {
           ...prevFormData.entityDescriptor.dtoDescriptor,
-          attributes: newAttributes
+          attributes: updateAttributes(prevFormData.entityDescriptor.dtoDescriptor.attributes)
         }
       }
     }));
+
+    setErrors((prevErrors) => ({ ...prevErrors, [`attribute_${index}`]: null }));
   };
 
   const handleSubmit = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) throw new Error('Failed to submit form');
-      
-      // Como estamos recebendo um arquivo, precisamos tratá-lo de forma diferente
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'genhex4j.zip';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+    if (validateStep()) {
+      setIsSubmitting(true);
+      try {
+        const response = await fetch('http://localhost:8080/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
 
-      // Reset form or show success message
-      setCurrentStep(1);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      // Show error message to user
+        if (!response.ok) throw new Error('Failed to submit form');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'genhex4j.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        setShowModal(true);
+        setCurrentStep(1);
+        setFormData({
+          entityDescriptor: {
+            packageName: '',
+            entityName: '',
+            systemPrompt: '',
+            jpaDescriptor: {
+              tableName: '',
+              attributes: []
+            },
+            domainDescriptor: {
+              attributes: []
+            },
+            dtoDescriptor: {
+              attributes: []
+            },
+            rulesDescriptor: []
+          },
+          standardTemplates: [],
+          rulesTemplates: [],
+          templates: []
+        });
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Formulário de API</h1>
-      <div className="bg-white p-4 rounded-md shadow-md">
-        {currentStep === 1 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Informações Gerais</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Package Name</label>
-                <input
+    <div className="container my-5">
+      <h1 className="text-center mb-4">Formulário de API</h1>
+      {isFetching ? (
+        <div className="text-center">
+          <Spinner animation="border" variant="primary" />
+          <p>Carregando dados...</p>
+        </div>
+      ) : (
+        <Form>
+          <ProgressBar now={(currentStep / totalSteps) * 100} className="mb-4" />
+          {currentStep === 1 && (
+            <div>
+              <h2>Informações Gerais</h2>
+              <Form.Group controlId="packageName">
+                <Form.Label>Nome do Pacote *</Form.Label>
+                <Form.Control
                   type="text"
                   name="packageName"
                   value={formData.entityDescriptor.packageName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  isInvalid={!!errors.packageName}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Entity Name</label>
-                <input
+                <Form.Control.Feedback type="invalid">
+                  {errors.packageName}
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group controlId="entityName">
+                <Form.Label>Nome da Entidade *</Form.Label>
+                <Form.Control
                   type="text"
                   name="entityName"
                   value={formData.entityDescriptor.entityName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  isInvalid={!!errors.entityName}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">System Prompt</label>
-                <textarea
+                <Form.Control.Feedback type="invalid">
+                  {errors.entityName}
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group controlId="systemPrompt">
+                <Form.Label>Prompt do Sistema *</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
                   name="systemPrompt"
                   value={formData.entityDescriptor.systemPrompt}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  isInvalid={!!errors.systemPrompt}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.systemPrompt}
+                </Form.Control.Feedback>
+              </Form.Group>
+              <div className="d-flex justify-content-end">
+                <Button variant="primary" onClick={handleNextStep}>
+                  Próximo
+                </Button>
               </div>
             </div>
-            <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md mt-4">Próximo</button>
-          </div>
-        )}
-        {currentStep === 2 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Atributos JPA</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Table Name</label>
-                <input
+          )}
+          {currentStep === 2 && (
+            <div>
+              <h2>Atributos JPA</h2>
+              <Form.Group controlId="tableName">
+                <Form.Label>Nome da Tabela *</Form.Label>
+                <Form.Control
                   type="text"
                   name="tableName"
                   value={formData.entityDescriptor.jpaDescriptor.tableName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  isInvalid={!!errors.tableName}
                 />
-              </div>
+                <Form.Control.Feedback type="invalid">
+                  {errors.tableName}
+                </Form.Control.Feedback>
+              </Form.Group>
               {formData.entityDescriptor.jpaDescriptor.attributes.map((attr, index) => (
-                <div key={index} className="p-4 border rounded-md space-y-2">
-                  <input
-                    type="text"
-                    value={attr.name}
-                    placeholder="Attribute Name"
-                    onChange={(e) => handleJpaAttributeChange(index, 'name', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={attr.type}
-                    placeholder="Attribute Type"
-                    onChange={(e) => handleJpaAttributeChange(index, 'type', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button type="button" onClick={() => handleRemoveAttribute('jpaDescriptor', index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remover Atributo</button>
+                <div key={index} className="border p-3 my-3">
+                  <h5>Atributo {index + 1}</h5>
+                  <Form.Group controlId={`attributeName_${index}`}>
+                    <Form.Label>Nome do Atributo *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={attr.name}
+                      placeholder="Nome do Atributo"
+                      onChange={(e) => handleJpaAttributeChange(index, 'name', e.target.value)}
+                      isInvalid={!!errors[`attribute_${index}`]}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`attributeType_${index}`}>
+                    <Form.Label>Tipo do Atributo *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={attr.type}
+                      placeholder="Tipo do Atributo"
+                      onChange={(e) => handleJpaAttributeChange(index, 'type', e.target.value)}
+                      isInvalid={!!errors[`attribute_${index}`]}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors[`attribute_${index}`]}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                  <Button variant="danger" onClick={() => handleRemoveAttribute(index)}>
+                    Remover Atributo
+                  </Button>
                 </div>
               ))}
-              <button type="button" onClick={() => handleAddAttribute('jpaDescriptor')} className="bg-green-500 text-white px-3 py-1 rounded-md">Adicionar Atributo</button>
+              {errors.attributes && (
+                <Alert variant="danger">
+                  {errors.attributes}
+                </Alert>
+              )}
+              <Button variant="success" onClick={handleAddAttribute}>
+                Adicionar Atributo
+              </Button>
+              <div className="d-flex justify-content-between mt-3">
+                <Button variant="secondary" onClick={handlePreviousStep}>
+                  Voltar
+                </Button>
+                <Button variant="primary" onClick={handleNextStep}>
+                  Próximo
+                </Button>
+              </div>
             </div>
-            <div className="mt-4 space-x-2">
-              <button type="button" onClick={handlePreviousStep} className="bg-gray-500 text-white px-3 py-1 rounded-md">Voltar</button>
-              <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md">Próximo</button>
-            </div>
-          </div>
-        )}
-        {currentStep === 3 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Regras</h2>
-            <div className="space-y-4">
+          )}
+          {currentStep === 3 && (
+            <div>
+              <h2>Regras</h2>
               {formData.entityDescriptor.rulesDescriptor.map((rule, index) => (
-                <div key={index} className="p-4 border rounded-md space-y-2">
-                  <input
-                    type="text"
-                    value={rule.ruleName}
-                    placeholder="Nome da Regra"
-                    onChange={(e) => handleRuleInputChange(index, 'ruleName', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={rule.description}
-                    placeholder="Descrição"
-                    onChange={(e) => handleRuleInputChange(index, 'description', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={rule.ruleInput}
-                    placeholder="Input da Regra"
-                    onChange={(e) => handleRuleInputChange(index, 'ruleInput', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={rule.ruleOutput}
-                    placeholder="Output da Regra"
-                    onChange={(e) => handleRuleInputChange(index, 'ruleOutput', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <textarea
-                    value={rule.llmGeneratedLogic}
-                    placeholder="Lógica Gerada por LLM"
-                    onChange={(e) => handleRuleInputChange(index, 'llmGeneratedLogic', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={rule.javaFunctionalInterface}
-                    placeholder="Interface Funcional Java"
-                    onChange={(e) => handleRuleInputChange(index, 'javaFunctionalInterface', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    value={rule.javaFuncionalIntefaceMethodName}
-                    placeholder="Nome do Método da Interface"
-                    onChange={(e) => handleRuleInputChange(index, 'javaFuncionalIntefaceMethodName', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button type="button" onClick={() => handleRemoveRule(index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remover Regra</button>
+                <div key={index} className="border p-3 my-3">
+                  <h5>Regra {index + 1}</h5>
+                  <Form.Group controlId={`ruleName_${index}`}>
+                    <Form.Label>Nome da Regra *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.ruleName}
+                      placeholder="Nome da Regra"
+                      onChange={(e) => handleRuleInputChange(index, 'ruleName', e.target.value)}
+                      isInvalid={!!errors[`rule_${index}`]}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`ruleDescription_${index}`}>
+                    <Form.Label>Descrição *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.description}
+                      placeholder="Descrição"
+                      onChange={(e) => handleRuleInputChange(index, 'description', e.target.value)}
+                      isInvalid={!!errors[`rule_${index}`]}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors[`rule_${index}`]}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group controlId={`ruleInput_${index}`}>
+                    <Form.Label>Input da Regra</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.ruleInput}
+                      placeholder="Input da Regra"
+                      onChange={(e) => handleRuleInputChange(index, 'ruleInput', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`ruleOutput_${index}`}>
+                    <Form.Label>Output da Regra</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.ruleOutput}
+                      placeholder="Output da Regra"
+                      onChange={(e) => handleRuleInputChange(index, 'ruleOutput', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`llmGeneratedLogic_${index}`}>
+                    <Form.Label>Lógica Gerada por LLM</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={rule.llmGeneratedLogic}
+                      placeholder="Lógica Gerada por LLM"
+                      onChange={(e) => handleRuleInputChange(index, 'llmGeneratedLogic', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`javaFunctionalInterface_${index}`}>
+                    <Form.Label>Interface Funcional Java</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.javaFunctionalInterface}
+                      placeholder="Interface Funcional Java"
+                      onChange={(e) => handleRuleInputChange(index, 'javaFunctionalInterface', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`javaFuncionalIntefaceMethodName_${index}`}>
+                    <Form.Label>Nome do Método da Interface</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={rule.javaFuncionalIntefaceMethodName}
+                      placeholder="Nome do Método da Interface"
+                      onChange={(e) => handleRuleInputChange(index, 'javaFuncionalIntefaceMethodName', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Button variant="danger" onClick={() => handleRemoveRule(index)}>
+                    Remover Regra
+                  </Button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddRule} className="bg-green-500 text-white px-3 py-1 rounded-md">Adicionar Regra</button>
+              {errors.rules && (
+                <Alert variant="danger">
+                  {errors.rules}
+                </Alert>
+              )}
+              <Button variant="success" onClick={handleAddRule}>
+                Adicionar Regra
+              </Button>
+              <div className="d-flex justify-content-between mt-3">
+                <Button variant="secondary" onClick={handlePreviousStep}>
+                  Voltar
+                </Button>
+                <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? 'Enviando...' : 'Enviar'}
+                </Button>
+              </div>
             </div>
-            <div className="mt-4 space-x-2">
-              <button type="button" onClick={handlePreviousStep} className="bg-gray-500 text-white px-3 py-1 rounded-md">Voltar</button>
-              <button type="button" onClick={handleSubmit} className="bg-blue-500 text-white px-3 py-1 rounded-md">Enviar</button>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </Form>
+      )}
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Sucesso</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Formulário enviado com sucesso! O download do arquivo iniciará em breve.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
