@@ -65,8 +65,8 @@ public class SessionGenerator {
 			
 			final String fileName = template.getName();
 			
-			final Path outputFilePath = path.resolve(fileName);
-		    final Path parentDir = outputFilePath.getParent();
+			final Path name = path.resolve(fileName);
+		    final Path parentDir = name.getParent();
 
 		    if (!Files.exists(parentDir)) {
 		        createDirectories(parentDir);
@@ -74,12 +74,12 @@ public class SessionGenerator {
 			
 			final String content = template.getContent();
 			
-			write(fileName, content);
+			write(name, content);
 		});
 		
 		final Configuration freemakerConfiguration = new Configuration(Configuration.VERSION_2_3_33);
 
-		freemakerConfiguration.setDirectoryForTemplateLoading(new File("templates"));
+		freemakerConfiguration.setDirectoryForTemplateLoading(new File(fileSystemIdentifier + "/templates"));
 		freemakerConfiguration.setDefaultEncoding("UTF-8");
 		
 		freemakerConfiguration.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
@@ -95,8 +95,7 @@ public class SessionGenerator {
 	}
 
 	@SneakyThrows
-	private Path write(final String fileName, final String content) {
-		final Path path = Paths.get(fileName);
+	private Path write(final Path path, final String content) {
 		
 		if(!Files.exists(path)) {
 			Files.createFile(path);
