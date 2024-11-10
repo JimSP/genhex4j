@@ -7,12 +7,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig {
-	
+
 	@Bean
 	public WebApplicationType webApplicationType() {
+		
 		return WebApplicationType.SERVLET;
 	}
-
+	
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         

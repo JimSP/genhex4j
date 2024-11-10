@@ -38,22 +38,22 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 
 	@Override
     public void run(String... args) throws Exception {
-
+		
 		Optional
 			.of(webApplicationType)
-			.filter(filter())
-			.ifPresent(action());
-
+			.filter(isServletApplicationType())
+			.ifPresent(execute());
     }
-
-	private Predicate<? super WebApplicationType> filter() {
-		return predicate-> predicate == WebApplicationType.NONE;
+	
+	private Predicate<? super WebApplicationType> isServletApplicationType() {
+		
+		return predicate->predicate == WebApplicationType.SERVLET;
 	}
 
-	private Consumer<? super WebApplicationType> action() {
+	private Consumer<? super WebApplicationType> execute() {
 		
-		return action->{
-		
+		return action ->{
+			
 			final List<TemplateDTO> templates = loader.execute();
 			final EntityDescriptor entityDescriptor = descriptorReader.readDescriptor();
 			final List<TemplateDescriptor> standardTemplates = templateProcessor.loadTemplates(template -> !template.getTemplateName().contains("rule"));
@@ -64,10 +64,13 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 			saveZipFile(genhex4j.getValue(), Paths.get(genhex4j.getKey() + "-genhex4j.zip"));
 		};
 	}
-	
+
+
 	@SneakyThrows
 	private void saveZipFile(final byte[] zipContent, final Path destinationPath) {
+		
 		log.info("destinationPath: {}", destinationPath);
-        Files.write(destinationPath, zipContent);
+        
+		Files.write(destinationPath, zipContent);
     }
 }

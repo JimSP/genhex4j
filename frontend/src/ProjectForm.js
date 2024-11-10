@@ -23,6 +23,8 @@ const ApiForm = () => {
     templates: []
   });
 
+  const [currentStep, setCurrentStep] = useState(1);
+
   useEffect(() => {
     // Simula a chamada da API e o preenchimento dos dados no estado
     const fetchInitialData = async () => {
@@ -112,140 +114,232 @@ const ApiForm = () => {
     }));
   };
 
+  const handleNextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePreviousStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const handleRuleInputChange = (index, field, value) => {
+    const newRules = [...formData.entityDescriptor.rulesDescriptor];
+    newRules[index][field] = value;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      entityDescriptor: {
+        ...prevFormData.entityDescriptor,
+        rulesDescriptor: newRules
+      }
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      if (!response.ok) throw new Error('Failed to submit form');
+      
+      // Como estamos recebendo um arquivo, precisamos tratá-lo de forma diferente
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'genhex4j.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Reset form or show success message
+      setCurrentStep(1);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Show error message to user
+    }
+  };
+
   return (
-    <form className="space-y-4 p-4">
-      <div>
-        <label className="block text-sm font-medium mb-1">Package Name</label>
-        <input
-          type="text"
-          name="packageName"
-          value={formData.entityDescriptor.packageName}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Entity Name</label>
-        <input
-          type="text"
-          name="entityName"
-          value={formData.entityDescriptor.entityName}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">System Prompt</label>
-        <textarea
-          name="systemPrompt"
-          value={formData.entityDescriptor.systemPrompt}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Table Name</label>
-        <input
-          type="text"
-          name="tableName"
-          value={formData.entityDescriptor.jpaDescriptor.tableName}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium mb-1">JPA Attributes</label>
-        {formData.entityDescriptor.jpaDescriptor.attributes.map((attr, index) => (
-          <div key={index} className="p-4 border rounded-md space-y-2">
-            <input
-              type="text"
-              value={attr.name}
-              placeholder="Attribute Name"
-              onChange={(e) => {
-                const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
-                newAttributes[index].name = e.target.value;
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  entityDescriptor: {
-                    ...prevFormData.entityDescriptor,
-                    jpaDescriptor: {
-                      ...prevFormData.entityDescriptor.jpaDescriptor,
-                      attributes: newAttributes
-                    }
-                  }
-                }));
-              }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={attr.type}
-              placeholder="Attribute Type"
-              onChange={(e) => {
-                const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
-                newAttributes[index].type = e.target.value;
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  entityDescriptor: {
-                    ...prevFormData.entityDescriptor,
-                    jpaDescriptor: {
-                      ...prevFormData.entityDescriptor.jpaDescriptor,
-                      attributes: newAttributes
-                    }
-                  }
-                }));
-              }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button type="button" onClick={() => handleRemoveAttribute('jpaDescriptor', index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remove Attribute</button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Formulário de API</h1>
+      <div className="bg-white p-4 rounded-md shadow-md">
+        {currentStep === 1 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Informações Gerais</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Package Name</label>
+                <input
+                  type="text"
+                  name="packageName"
+                  value={formData.entityDescriptor.packageName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Entity Name</label>
+                <input
+                  type="text"
+                  name="entityName"
+                  value={formData.entityDescriptor.entityName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">System Prompt</label>
+                <textarea
+                  name="systemPrompt"
+                  value={formData.entityDescriptor.systemPrompt}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md mt-4">Ópróximo</button>
           </div>
-        ))}
-        <button type="button" onClick={() => handleAddAttribute('jpaDescriptor')} className="bg-green-500 text-white px-3 py-1 rounded-md">Add Attribute</button>
-      </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium mb-1">Rules Descriptor</label>
-        {formData.entityDescriptor.rulesDescriptor.map((rule, index) => (
-          <div key={index} className="p-4 border rounded-md space-y-2">
-            <input
-              type="text"
-              value={rule.ruleName}
-              placeholder="Rule Name"
-              onChange={(e) => {
-                const newRules = [...formData.entityDescriptor.rulesDescriptor];
-                newRules[index].ruleName = e.target.value;
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  entityDescriptor: {
-                    ...prevFormData.entityDescriptor,
-                    rulesDescriptor: newRules
-                  }
-                }));
-              }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              value={rule.description}
-              placeholder="Description"
-              onChange={(e) => {
-                const newRules = [...formData.entityDescriptor.rulesDescriptor];
-                newRules[index].description = e.target.value;
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  entityDescriptor: {
-                    ...prevFormData.entityDescriptor,
-                    rulesDescriptor: newRules
-                  }
-                }));
-              }}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button type="button" onClick={() => handleRemoveRule(index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remove Rule</button>
+        )}
+        {currentStep === 2 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Atributos JPA</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Table Name</label>
+                <input
+                  type="text"
+                  name="tableName"
+                  value={formData.entityDescriptor.jpaDescriptor.tableName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {formData.entityDescriptor.jpaDescriptor.attributes.map((attr, index) => (
+                <div key={index} className="p-4 border rounded-md space-y-2">
+                  <input
+                    type="text"
+                    value={attr.name}
+                    placeholder="Attribute Name"
+                    onChange={(e) => {
+                      const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
+                      newAttributes[index].name = e.target.value;
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        entityDescriptor: {
+                          ...prevFormData.entityDescriptor,
+                          jpaDescriptor: {
+                            ...prevFormData.entityDescriptor.jpaDescriptor,
+                            attributes: newAttributes
+                          }
+                        }
+                      }));
+                    }}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={attr.type}
+                    placeholder="Attribute Type"
+                    onChange={(e) => {
+                      const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
+                      newAttributes[index].type = e.target.value;
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        entityDescriptor: {
+                          ...prevFormData.entityDescriptor,
+                          jpaDescriptor: {
+                            ...prevFormData.entityDescriptor.jpaDescriptor,
+                            attributes: newAttributes
+                          }
+                        }
+                      }));
+                    }}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button type="button" onClick={() => handleRemoveAttribute('jpaDescriptor', index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remover Atributo</button>
+                </div>
+              ))}
+              <button type="button" onClick={() => handleAddAttribute('jpaDescriptor')} className="bg-green-500 text-white px-3 py-1 rounded-md">Adicionar Atributo</button>
+            </div>
+            <div className="mt-4 space-x-2">
+              <button type="button" onClick={handlePreviousStep} className="bg-gray-500 text-white px-3 py-1 rounded-md">Voltar</button>
+              <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md">Próximo</button>
+            </div>
           </div>
-        ))}
-        <button type="button" onClick={handleAddRule} className="bg-green-500 text-white px-3 py-1 rounded-md">Add Rule</button>
+        )}
+        {currentStep === 3 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Regras</h2>
+            <div className="space-y-4">
+              {formData.entityDescriptor.rulesDescriptor.map((rule, index) => (
+                <div key={index} className="p-4 border rounded-md space-y-2">
+                  <input
+                    type="text"
+                    value={rule.ruleName}
+                    placeholder="Nome da Regra"
+                    onChange={(e) => handleRuleInputChange(index, 'ruleName', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={rule.description}
+                    placeholder="Descrição"
+                    onChange={(e) => handleRuleInputChange(index, 'description', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={rule.ruleInput}
+                    placeholder="Input da Regra"
+                    onChange={(e) => handleRuleInputChange(index, 'ruleInput', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={rule.ruleOutput}
+                    placeholder="Output da Regra"
+                    onChange={(e) => handleRuleInputChange(index, 'ruleOutput', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <textarea
+                    value={rule.llmGeneratedLogic}
+                    placeholder="Lógica Gerada por LLM"
+                    onChange={(e) => handleRuleInputChange(index, 'llmGeneratedLogic', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={rule.javaFunctionalInterface}
+                    placeholder="Interface Funcional Java"
+                    onChange={(e) => handleRuleInputChange(index, 'javaFunctionalInterface', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={rule.javaFuncionalIntefaceMethodName}
+                    placeholder="Nome do Método da Interface"
+                    onChange={(e) => handleRuleInputChange(index, 'javaFuncionalIntefaceMethodName', e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button type="button" onClick={() => handleRemoveRule(index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remover Regra</button>
+                </div>
+              ))}
+              <button type="button" onClick={handleAddRule} className="bg-green-500 text-white px-3 py-1 rounded-md">Adicionar Regra</button>
+            </div>
+            <div className="mt-4 space-x-2">
+              <button type="button" onClick={handlePreviousStep} className="bg-gray-500 text-white px-3 py-1 rounded-md">Voltar</button>
+              <button type="button" onClick={handleSubmit} className="bg-blue-500 text-white px-3 py-1 rounded-md">Enviar</button>
+            </div>
+          </div>
+        )}
       </div>
-    </form>
+    </div>
   );
 };
 
