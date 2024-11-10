@@ -54,7 +54,7 @@ const ApiForm = () => {
     }));
   };
 
-  const handleAddAttribute = (descriptor, attributeType) => {
+  const handleAddAttribute = (descriptor) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       entityDescriptor: {
@@ -134,6 +134,29 @@ const ApiForm = () => {
     }));
   };
 
+  const handleJpaAttributeChange = (index, field, value) => {
+    const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
+    newAttributes[index][field] = value;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      entityDescriptor: {
+        ...prevFormData.entityDescriptor,
+        jpaDescriptor: {
+          ...prevFormData.entityDescriptor.jpaDescriptor,
+          attributes: newAttributes
+        },
+        domainDescriptor: {
+          ...prevFormData.entityDescriptor.domainDescriptor,
+          attributes: newAttributes
+        },
+        dtoDescriptor: {
+          ...prevFormData.entityDescriptor.dtoDescriptor,
+          attributes: newAttributes
+        }
+      }
+    }));
+  };
+
   const handleSubmit = async () => {
     try {
       const response = await fetch('http://localhost:8080/', {
@@ -203,7 +226,7 @@ const ApiForm = () => {
                 />
               </div>
             </div>
-            <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md mt-4">Ópróximo</button>
+            <button type="button" onClick={handleNextStep} className="bg-blue-500 text-white px-3 py-1 rounded-md mt-4">Próximo</button>
           </div>
         )}
         {currentStep === 2 && (
@@ -226,40 +249,14 @@ const ApiForm = () => {
                     type="text"
                     value={attr.name}
                     placeholder="Attribute Name"
-                    onChange={(e) => {
-                      const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
-                      newAttributes[index].name = e.target.value;
-                      setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        entityDescriptor: {
-                          ...prevFormData.entityDescriptor,
-                          jpaDescriptor: {
-                            ...prevFormData.entityDescriptor.jpaDescriptor,
-                            attributes: newAttributes
-                          }
-                        }
-                      }));
-                    }}
+                    onChange={(e) => handleJpaAttributeChange(index, 'name', e.target.value)}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
                     type="text"
                     value={attr.type}
                     placeholder="Attribute Type"
-                    onChange={(e) => {
-                      const newAttributes = [...formData.entityDescriptor.jpaDescriptor.attributes];
-                      newAttributes[index].type = e.target.value;
-                      setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        entityDescriptor: {
-                          ...prevFormData.entityDescriptor,
-                          jpaDescriptor: {
-                            ...prevFormData.entityDescriptor.jpaDescriptor,
-                            attributes: newAttributes
-                          }
-                        }
-                      }));
-                    }}
+                    onChange={(e) => handleJpaAttributeChange(index, 'type', e.target.value)}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button type="button" onClick={() => handleRemoveAttribute('jpaDescriptor', index)} className="bg-red-500 text-white px-3 py-1 rounded-md">Remover Atributo</button>

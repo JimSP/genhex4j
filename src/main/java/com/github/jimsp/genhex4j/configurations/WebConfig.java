@@ -1,4 +1,5 @@
 package com.github.jimsp.genhex4j.configurations;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ public class WebConfig {
 	
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        
+
     	return new WebMvcConfigurer() {
             
         	@Override
