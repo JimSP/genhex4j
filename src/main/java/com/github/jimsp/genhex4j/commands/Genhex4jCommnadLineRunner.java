@@ -47,7 +47,7 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 	
 	private Predicate<? super WebApplicationType> isServletApplicationType() {
 		
-		return predicate->predicate == WebApplicationType.SERVLET;
+		return predicate->predicate == WebApplicationType.NONE;
 	}
 
 	private Consumer<? super WebApplicationType> execute() {
