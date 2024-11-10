@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, ProgressBar, Alert, Spinner, Modal } from 'react-bootstrap';
+import ContentEditable from 'react-contenteditable';
 
 const ApiForm = () => {
+  // Definição do estado inicial
   const [formData, setFormData] = useState({
     entityDescriptor: {
       packageName: '',
@@ -26,14 +28,14 @@ const ApiForm = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(false); // Adicionado
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
   const totalSteps = 3;
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      setIsFetching(true);
+      setIsFetching(true); // Atualizado
       try {
         const response = await fetch('http://localhost:8080/');
         if (!response.ok) throw new Error('Failed to fetch data');
@@ -43,12 +45,14 @@ const ApiForm = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setIsFetching(false);
+        setIsFetching(false); // Atualizado
       }
     };
 
     fetchInitialData();
   }, []);
+
+  // ... [As demais funções permanecem as mesmas, conforme fornecido anteriormente]
 
   const validateStep = () => {
     let stepErrors = {};
@@ -76,7 +80,6 @@ const ApiForm = () => {
         });
       }
     } else if (currentStep === 3) {
-      // Validação das regras
       if (formData.entityDescriptor.rulesDescriptor.length === 0) {
         stepErrors.rules = 'Adicione pelo menos uma regra.';
       } else {
@@ -117,7 +120,15 @@ const ApiForm = () => {
   };
 
   const handleAddAttribute = () => {
-    const initializeAttribute = () => ({ name: '', type: '' });
+    const initializeAttribute = () => ({
+      name: '',
+      type: '',
+      primaryKey: false,
+      required: false,
+      maxLength: null,
+      generatedValue: false,
+      columnDefinition: ''
+    });
     setFormData((prevFormData) => ({
       ...prevFormData,
       entityDescriptor: {
@@ -228,7 +239,19 @@ const ApiForm = () => {
 
   const handleJpaAttributeChange = (index, field, value) => {
     const updateAttributes = (attributes) =>
-      attributes.map((attr, i) => (i === index ? { ...attr, [field]: value } : attr));
+      attributes.map((attr, i) => {
+        if (i === index) {
+          const updatedAttr = { ...attr, [field]: value };
+
+          // Se 'primaryKey' for desmarcado, 'generatedValue' deve ser false
+          if (field === 'primaryKey' && !value) {
+            updatedAttr.generatedValue = false;
+          }
+
+          return updatedAttr;
+        }
+        return attr;
+      });
 
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -410,6 +433,51 @@ const ApiForm = () => {
                     <Form.Control.Feedback type="invalid">
                       {errors[`attribute_${index}`]}
                     </Form.Control.Feedback>
+                  </Form.Group>
+                  {/* Campos adicionais */}
+                  <Form.Group controlId={`primaryKey_${index}`}>
+                    <Form.Check
+                      type="checkbox"
+                      label="Chave Primária"
+                      checked={attr.primaryKey || false}
+                      onChange={(e) => handleJpaAttributeChange(index, 'primaryKey', e.target.checked)}
+                    />
+                  </Form.Group>
+                  {attr.primaryKey && (
+                    <Form.Group controlId={`generatedValue_${index}`}>
+                      <Form.Check
+                        type="checkbox"
+                        label="Valor Gerado"
+                        checked={attr.generatedValue || false}
+                        onChange={(e) => handleJpaAttributeChange(index, 'generatedValue', e.target.checked)}
+                      />
+                    </Form.Group>
+                  )}
+                  <Form.Group controlId={`required_${index}`}>
+                    <Form.Check
+                      type="checkbox"
+                      label="Obrigatório"
+                      checked={attr.required || false}
+                      onChange={(e) => handleJpaAttributeChange(index, 'required', e.target.checked)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`maxLength_${index}`}>
+                    <Form.Label>Tamanho Máximo</Form.Label>
+                    <Form.Control
+                      type="number"
+                      value={attr.maxLength || ''}
+                      placeholder="Tamanho Máximo"
+                      onChange={(e) => handleJpaAttributeChange(index, 'maxLength', e.target.value ? parseInt(e.target.value) : null)}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId={`columnDefinition_${index}`}>
+                    <Form.Label>Definição da Coluna</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={attr.columnDefinition || ''}
+                      placeholder="Definição da Coluna"
+                      onChange={(e) => handleJpaAttributeChange(index, 'columnDefinition', e.target.value)}
+                    />
                   </Form.Group>
                   <Button variant="danger" onClick={() => handleRemoveAttribute(index)}>
                     Remover Atributo
