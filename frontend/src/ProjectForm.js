@@ -45,13 +45,26 @@ const ApiForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      entityDescriptor: {
-        ...prevFormData.entityDescriptor,
-        [name]: value
-      }
-    }));
+    if (name === 'tableName') {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        entityDescriptor: {
+          ...prevFormData.entityDescriptor,
+          jpaDescriptor: {
+            ...prevFormData.entityDescriptor.jpaDescriptor,
+            tableName: value
+          }
+        }
+      }));
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        entityDescriptor: {
+          ...prevFormData.entityDescriptor,
+          [name]: value
+        }
+      }));
+    }
   };
 
   const handleAddAttribute = (descriptor) => {
