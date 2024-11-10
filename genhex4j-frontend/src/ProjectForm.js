@@ -36,7 +36,7 @@ const ApiForm = () => {
     const fetchInitialData = async () => {
       setIsFetching(true);
       try {
-        const response = await fetch('http://localhost:8080/');
+        const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/');
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
 
@@ -311,7 +311,7 @@ const ApiForm = () => {
       setIsSubmitting(true);
       try {
         // Enviar os dados para o servidor
-        const response = await fetch('http://localhost:8080/', {
+        const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ const ApiForm = () => {
       setIsSubmitting(true);
       try {
         // Enviar os dados para o servidor sem sanitização
-        const response = await fetch('http://localhost:8080/', {
+        const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
