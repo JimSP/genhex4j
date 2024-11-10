@@ -1,6 +1,24 @@
+// src/ApiForm.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { Form, Button, ProgressBar, Alert, Spinner, Modal } from 'react-bootstrap';
+import {
+  Form,
+  Button,
+  ProgressBar,
+  Alert,
+  Spinner,
+  Modal,
+  Nav,
+  Toast,
+  ToastContainer,
+} from 'react-bootstrap';
 import debounce from 'lodash.debounce';
+import {
+  saveForm,
+  getAllForms,
+  getFormById,
+  updateForm,
+  deleteForm,
+} from './db';
 
 const ApiForm = () => {
   const [formData, setFormData] = useState(null);
@@ -9,6 +27,9 @@ const ApiForm = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [savedForms, setSavedForms] = useState([]);
+  const [currentFormId, setCurrentFormId] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
   const totalSteps = 5;
 
   useEffect(() => {
@@ -27,7 +48,13 @@ const ApiForm = () => {
       }
     };
 
+    const fetchSavedForms = async () => {
+      const forms = await getAllForms();
+      setSavedForms(forms);
+    };
+
     fetchInitialData();
+    fetchSavedForms();
   }, []);
 
   const validateStep = useCallback(() => {
@@ -182,10 +209,6 @@ const ApiForm = () => {
     [formData]
   );
 
-  const handleRuleBlur = useCallback((index, field) => {
-    // Não aplicamos destaque ou sanitização
-  }, []);
-
   const handleJpaAttributeChange = useCallback((index, field, value) => {
     if (!formData) return;
 
@@ -225,9 +248,104 @@ const ApiForm = () => {
     });
   }, [formData]);
 
-  const handleTemplateBlur = useCallback((index, field) => {
-    // Não aplicamos destaque ou sanitização
+  // Função para ir para um passo específico
+  const goToStep = useCallback((step) => {
+    setCurrentStep(step);
   }, []);
+
+  // Funções para salvar, carregar e excluir formulários
+  const handleSaveForm = async () => {
+    const formName = prompt(
+      'Digite um nome para salvar este formulário:',
+      formData.entityDescriptor.entityName || 'Novo Formulário'
+    );
+
+    if (formName) {
+      const formToSave = {
+        name: formName,
+        data: formData,
+        currentStep,
+      };
+
+      if (currentFormId) {
+        await updateForm(currentFormId, formToSave);
+      } else {
+        const id = await saveForm(formToSave);
+        setCurrentFormId(id);
+      }
+
+      const forms = await getAllForms();
+      setSavedForms(forms);
+
+      setToastMessage('Formulário salvo com sucesso!');
+    }
+  };
+
+  const handleLoadForm = async (id) => {
+    const form = await getFormById(id);
+    if (form) {
+      setFormData(form.data);
+      setCurrentFormId(form.id);
+      setCurrentStep(form.currentStep || 1);
+      setToastMessage(`Formulário "${form.name}" carregado com sucesso!`);
+    }
+  };
+
+  const handleDeleteForm = async (id) => {
+    if (window.confirm('Tem certeza de que deseja excluir este formulário?')) {
+      await deleteForm(id);
+      const forms = await getAllForms();
+      setSavedForms(forms);
+      if (currentFormId === id) {
+        setFormData(null);
+        setCurrentFormId(null);
+      }
+      setToastMessage('Formulário excluído com sucesso!');
+    }
+  };
+
+  // Função para enviar um formulário salvo
+  const handleSubmitSavedForm = async (id) => {
+    const form = await getFormById(id);
+    if (form) {
+      setIsSubmitting(true);
+      try {
+        // Enviar os dados para o servidor
+        const response = await fetch('http://localhost:8080/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(form.data),
+        });
+
+        if (!response.ok) throw new Error('Failed to submit form');
+
+        // Processar a resposta
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'genhex4j.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        setShowModal(true);
+        setCurrentStep(1);
+        setCurrentFormId(null);
+        setFormData(null);
+
+        setToastMessage(`Formulário "${form.name}" enviado com sucesso!`);
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   const handleSubmit = useCallback(async () => {
     if (validateStep()) {
@@ -257,6 +375,8 @@ const ApiForm = () => {
 
         setShowModal(true);
         setCurrentStep(1);
+        setCurrentFormId(null);
+        setFormData(null);
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
@@ -278,6 +398,50 @@ const ApiForm = () => {
   return (
     <div className="container my-5">
       <h1 className="text-center mb-4">Formulário de API</h1>
+
+      {/* Lista de formulários salvos */}
+      <div className="saved-forms mb-4">
+        <h3>Formulários Salvos</h3>
+        {savedForms.length === 0 ? (
+          <p>Nenhum formulário salvo.</p>
+        ) : (
+          <ul className="list-group">
+            {savedForms.map((form) => (
+              <li
+                key={form.id}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <span>{form.name}</span>
+                <div>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => handleSubmitSavedForm(form.id)}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Enviando...' : 'Enviar'}
+                  </Button>{' '}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleLoadForm(form.id)}
+                  >
+                    Carregar
+                  </Button>{' '}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDeleteForm(form.id)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <Form>
         <ProgressBar now={(currentStep / totalSteps) * 100} className="mb-4" />
         {currentStep === 1 && (
@@ -334,7 +498,10 @@ const ApiForm = () => {
                 </Form.Control.Feedback>
               )}
             </Form.Group>
-            <div className="d-flex justify-content-end">
+            <div className="d-flex justify-content-between mt-3">
+              <Button variant="secondary" onClick={handleSaveForm}>
+                Salvar Formulário
+              </Button>
               <Button variant="primary" onClick={handleNextStep}>
                 Próximo
               </Button>
@@ -445,9 +612,14 @@ const ApiForm = () => {
               <Button variant="secondary" onClick={handlePreviousStep}>
                 Voltar
               </Button>
-              <Button variant="primary" onClick={handleNextStep}>
-                Próximo
-              </Button>
+              <div>
+                <Button variant="secondary" onClick={handleSaveForm}>
+                  Salvar Formulário
+                </Button>{' '}
+                <Button variant="primary" onClick={handleNextStep}>
+                  Próximo
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -545,9 +717,14 @@ const ApiForm = () => {
               <Button variant="secondary" onClick={handlePreviousStep}>
                 Voltar
               </Button>
-              <Button variant="primary" onClick={handleNextStep}>
-                Próximo
-              </Button>
+              <div>
+                <Button variant="secondary" onClick={handleSaveForm}>
+                  Salvar Formulário
+                </Button>{' '}
+                <Button variant="primary" onClick={handleNextStep}>
+                  Próximo
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -592,9 +769,14 @@ const ApiForm = () => {
               <Button variant="secondary" onClick={handlePreviousStep}>
                 Voltar
               </Button>
-              <Button variant="primary" onClick={handleNextStep}>
-                Próximo
-              </Button>
+              <div>
+                <Button variant="secondary" onClick={handleSaveForm}>
+                  Salvar Formulário
+                </Button>{' '}
+                <Button variant="primary" onClick={handleNextStep}>
+                  Próximo
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -602,18 +784,96 @@ const ApiForm = () => {
           <div>
             <h2>Revisão e Envio</h2>
             <p>Revise todas as informações inseridas antes de enviar.</p>
+
+            {/* Navegação entre as etapas */}
+            <Nav className="flex-column mb-3">
+              <Nav.Link onClick={() => goToStep(1)}>Editar Informações Gerais</Nav.Link>
+              <Nav.Link onClick={() => goToStep(2)}>Editar Atributos JPA</Nav.Link>
+              <Nav.Link onClick={() => goToStep(3)}>Editar Regras</Nav.Link>
+              <Nav.Link onClick={() => goToStep(4)}>Editar Templates</Nav.Link>
+            </Nav>
+
+            {/* Resumo dos dados */}
+            <div>
+              <h4>Informações Gerais</h4>
+              <p><strong>Nome do Pacote:</strong> {formData.entityDescriptor.packageName}</p>
+              <p><strong>Nome da Entidade:</strong> {formData.entityDescriptor.entityName}</p>
+              <p><strong>Prompt do Sistema:</strong> {formData.entityDescriptor.systemPrompt}</p>
+
+              <h4>Atributos JPA</h4>
+              <p><strong>Nome da Tabela:</strong> {formData.entityDescriptor.jpaDescriptor.tableName}</p>
+              {formData.entityDescriptor.jpaDescriptor.attributes.map((attr, index) => (
+                <div key={index}>
+                  <p><strong>Atributo {index + 1}:</strong></p>
+                  <ul>
+                    <li><strong>Nome:</strong> {attr.name}</li>
+                    <li><strong>Tipo:</strong> {attr.type}</li>
+                    <li><strong>Chave Primária:</strong> {attr.primaryKey ? 'Sim' : 'Não'}</li>
+                    <li><strong>Valor Gerado:</strong> {attr.generatedValue ? 'Sim' : 'Não'}</li>
+                    <li><strong>Obrigatório:</strong> {attr.required ? 'Sim' : 'Não'}</li>
+                    <li><strong>Tamanho Máximo:</strong> {attr.maxLength || 'N/A'}</li>
+                    <li><strong>Definição da Coluna:</strong> {attr.columnDefinition || 'N/A'}</li>
+                  </ul>
+                </div>
+              ))}
+
+              <h4>Regras</h4>
+              {formData.entityDescriptor.rulesDescriptor.map((rule, index) => (
+                <div key={index}>
+                  <p><strong>Regra {index + 1}:</strong></p>
+                  <ul>
+                    <li><strong>Nome:</strong> {rule.ruleName}</li>
+                    <li><strong>Descrição:</strong> {rule.description}</li>
+                    <li><strong>Input da Regra:</strong> {rule.ruleInput}</li>
+                    <li><strong>Output da Regra:</strong> {rule.ruleOutput}</li>
+                    {/* Outros campos da regra */}
+                  </ul>
+                </div>
+              ))}
+
+              <h4>Templates</h4>
+              {formData.templates.map((template, index) => (
+                <div key={index}>
+                  <p><strong>Template {index + 1}:</strong></p>
+                  <ul>
+                    <li><strong>Nome:</strong> {template.name}</li>
+                    <li><strong>Conteúdo:</strong></li>
+                    <pre>{template.content}</pre>
+                  </ul>
+                </div>
+              ))}
+            </div>
+
             <div className="d-flex justify-content-between mt-3">
               <Button variant="secondary" onClick={handlePreviousStep}>
                 Voltar
               </Button>
-              <Button variant="success" onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando...' : 'Enviar'}
-              </Button>
+              <div>
+                <Button variant="secondary" onClick={handleSaveForm}>
+                  Salvar Formulário
+                </Button>{' '}
+                <Button variant="success" onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? 'Enviando...' : 'Enviar'}
+                </Button>
+              </div>
             </div>
           </div>
         )}
       </Form>
 
+      {/* Toast para feedback ao usuário */}
+      <ToastContainer position="top-end">
+        <Toast
+          onClose={() => setToastMessage(null)}
+          show={!!toastMessage}
+          delay={3000}
+          autohide
+        >
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
+      {/* Modal de sucesso (após submissão) */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Sucesso</Modal.Title>
