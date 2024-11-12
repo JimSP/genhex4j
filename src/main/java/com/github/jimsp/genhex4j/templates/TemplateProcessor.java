@@ -16,6 +16,8 @@ import java.util.function.Predicate;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TemplateProcessor {
 
-	OpenAiChatModel openAiChatModel;
 	FileSystem inMemoryFileSystem;
 	
 	public List<TemplateDescriptor> loadTemplates(final Predicate<TemplateDescriptor> filter) {
@@ -69,11 +70,11 @@ public class TemplateProcessor {
 	}
 	
 	@SneakyThrows
-	public void processRuleTemplates(final Configuration freemakerConfiguration, final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
+	public void processRuleTemplates(final LLMCredencials llmCredencials, final Configuration freemakerConfiguration, final List<TemplateDescriptor> templates, final EntityDescriptor entityDescriptor, final Path fileSystemIdentifier) {
 		
 	    for (final TemplateDescriptor templateDesc : templates) {
 	        
-	    	final List<Map<String, Object>> rulesList = prepareRulesList(templateDesc, entityDescriptor);
+	    	final List<Map<String, Object>> rulesList = prepareRulesList(llmCredencials, templateDesc, entityDescriptor);
 
 	        for (Map<String, Object> ruleData : rulesList) {
 	            
@@ -88,7 +89,9 @@ public class TemplateProcessor {
 			final EntityDescriptor entityDescriptor) {
 		
 		String outputPath = templateDesc.getOutputPathPattern();
+		
 		final Map<String, String> placeholders = new HashMap<>();
+		
 		placeholders.put("${packageName}", entityDescriptor.getPackageName().replace('.', '/'));
 		placeholders.put("${entityName}", entityDescriptor.getEntityName());
 
@@ -154,19 +157,19 @@ public class TemplateProcessor {
 	    return dataModel;
 	}
 	
-	private List<Map<String, Object>> prepareRulesList(final TemplateDescriptor templateDescriptor, final EntityDescriptor entityDescriptor) {
+	private List<Map<String, Object>> prepareRulesList(final LLMCredencials llmCredencials, final TemplateDescriptor templateDescriptor, final EntityDescriptor entityDescriptor) {
 	    
 		final List<Map<String, Object>> rulesList = new ArrayList<>();
 
 	    for (final RuleDescriptor ruleDescriptor : entityDescriptor.getRulesDescriptor()) {
-	        Map<String, Object> ruleData = new HashMap<>();
+	        final Map<String, Object> ruleData = new HashMap<>();
 	        ruleData.put("ruleName", ruleDescriptor.getRuleName());
 	        ruleData.put("ruleInput", ruleDescriptor.getRuleInput());
 	        ruleData.put("ruleOutput", ruleDescriptor.getRuleOutput());
 	        ruleData.put("additionalInput", ruleDescriptor.getRuleAdditionalInput());
 	        ruleData.put("javaFunctionalInterface", ruleDescriptor.getJavaFunctionalInterface());
 	        ruleData.put("javaFuncionalIntefaceMethodName", ruleDescriptor.getJavaFuncionalIntefaceMethodName());
-	        ruleData.put("llmGeneratedLogic", generateLLMLogic(templateDescriptor, ruleDescriptor, entityDescriptor.getSystemPrompt()));
+	        ruleData.put("llmGeneratedLogic", generateLLMLogic(llmCredencials, templateDescriptor, ruleDescriptor, entityDescriptor.getSystemPrompt()));
 	        
 	        rulesList.add(ruleData);
 	    }
@@ -175,7 +178,17 @@ public class TemplateProcessor {
 	}
 
 	@SneakyThrows
-	private String generateLLMLogic(final TemplateDescriptor templateDescriptor, final RuleDescriptor ruleDescriptor, final String systemPrompt) {
+	private String generateLLMLogic(final LLMCredencials llmCredencials, final TemplateDescriptor templateDescriptor, final RuleDescriptor ruleDescriptor, final String systemPrompt) {
+		
+		final OpenAiApi openAiApi = new OpenAiApi(llmCredencials.getOpenAiBaseUrl(), llmCredencials.getOpenAiApiKey());
+		
+		final OpenAiChatOptions openAiChatOptions = OpenAiChatOptions
+				.builder()
+				.withModel(llmCredencials.getChatOptionsModel())
+				.withTemperature(llmCredencials.getChatOptionsTemperature())
+				.build();
+		
+		final OpenAiChatModel openAiChatModel = new OpenAiChatModel(openAiApi, openAiChatOptions);
 		
 		final String contentTemplate = Files.readString(Paths.get("templates/" + templateDescriptor.getTemplateName()));
 		

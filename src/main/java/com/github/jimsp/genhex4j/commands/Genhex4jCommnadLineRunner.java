@@ -18,6 +18,7 @@ import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
 import com.github.jimsp.genhex4j.dto.TemplateDTO;
 import com.github.jimsp.genhex4j.session.Loader;
 import com.github.jimsp.genhex4j.session.SessionGenerator;
+import com.github.jimsp.genhex4j.templates.LLMCredencials;
 import com.github.jimsp.genhex4j.templates.TemplateDescriptor;
 import com.github.jimsp.genhex4j.templates.TemplateProcessor;
 
@@ -35,6 +36,7 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 	TemplateProcessor templateProcessor;
 	Loader loader;
 	WebApplicationType webApplicationType;
+	LLMCredencials llmCredencials;
 
 	@Override
     public void run(String... args) throws Exception {
@@ -59,7 +61,7 @@ public class Genhex4jCommnadLineRunner implements CommandLineRunner {
 			final List<TemplateDescriptor> standardTemplates = templateProcessor.loadTemplates(template -> !template.getTemplateName().contains("rule"));
 	        final List<TemplateDescriptor> rulesTemplates = templateProcessor.loadTemplates(template -> template.getTemplateName().contains("rule"));
 			
-			final Pair<String, byte[]> genhex4j = sessionGenerator.execute(entityDescriptor, templates, standardTemplates, rulesTemplates);
+			final Pair<String, byte[]> genhex4j = sessionGenerator.execute(llmCredencials, entityDescriptor, templates, standardTemplates, rulesTemplates);
 			
 			saveZipFile(genhex4j.getValue(), Paths.get(genhex4j.getKey() + "-genhex4j.zip"));
 		};

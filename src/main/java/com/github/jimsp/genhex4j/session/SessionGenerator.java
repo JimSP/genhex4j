@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.jimsp.genhex4j.descriptors.EntityDescriptor;
 import com.github.jimsp.genhex4j.dto.TemplateDTO;
+import com.github.jimsp.genhex4j.templates.LLMCredencials;
 import com.github.jimsp.genhex4j.templates.TemplateDescriptor;
 import com.github.jimsp.genhex4j.templates.TemplateProcessor;
 import com.github.jimsp.genhex4j.zip.ZipGenerator;
@@ -33,7 +34,7 @@ public class SessionGenerator {
 	ZipGenerator zipGenerator;
 
 	@SneakyThrows
-    public Pair<String, byte[]> execute(final EntityDescriptor entityDescriptor, final List<TemplateDTO> templates, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
+    public Pair<String, byte[]> execute(LLMCredencials llmCredencials, EntityDescriptor entityDescriptor, final List<TemplateDTO> templates, final List<TemplateDescriptor> standardTemplates, final List<TemplateDescriptor> ruleTemplates) {
 		
 		final String fileSystemIdentifierString = UUID.randomUUID().toString();
 		final Path fileSystemIdentifier = inMemoryFileSystem.getPath(fileSystemIdentifierString);
@@ -46,7 +47,7 @@ public class SessionGenerator {
 		final Configuration freemakerConfiguration = freemakerConfiguration(fileSystemIdentifierString, templates);
 		
         templateProcessor.processStandardTemplates(freemakerConfiguration, standardTemplates, entityDescriptor, fileSystemIdentifier); 
-        templateProcessor.processRuleTemplates(freemakerConfiguration, ruleTemplates, entityDescriptor, fileSystemIdentifier);
+        templateProcessor.processRuleTemplates(llmCredencials, freemakerConfiguration, ruleTemplates, entityDescriptor, fileSystemIdentifier);
         
         return Pair.of(fileSystemIdentifierString, zipGenerator.createZip(fileSystemIdentifier));
     }
