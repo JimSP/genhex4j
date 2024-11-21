@@ -64,7 +64,7 @@ const ApiForm = () => {
 		const fetchInitialData = async () => {
 			setIsFetching(true);
 			try {
-				const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/', {
+				const response = await fetch('http://64.181.179.42:8080/', {
 					headers: {
 						'ngrok-skip-browser-warning': 'true',
 					},
@@ -448,7 +448,7 @@ const ApiForm = () => {
 				};
 
 				// Enviar os dados para o servidor
-				const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/', {
+				const response = await fetch('http://64.181.179.42:8080/', {
 					method: 'POST',
 					headers: headers,
 					body: JSON.stringify(form.data),
@@ -497,7 +497,7 @@ const ApiForm = () => {
 				};
 
 				// Enviar os dados para o servidor
-				const response = await fetch('https://mighty-nearly-minnow.ngrok-free.app/', {
+				const response = await fetch('http://64.181.179.42:8080/', {
 					method: 'POST',
 					headers: headers,
 					body: JSON.stringify(formData),
