@@ -28,10 +28,12 @@ import com.github.jimsp.genhex4j.templates.TemplateProcessor;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Validated
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 public class Genhex4jController {
 	
 	private final SessionGenerator sessionGenerator;
@@ -41,6 +43,8 @@ public class Genhex4jController {
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Genhex4jDTO> getTemplateProject() {
+		
+		log.info("m=getTemplateProject");
 		
 		final List<TemplateDTO> templates = loader.execute();
 		
@@ -61,6 +65,8 @@ public class Genhex4jController {
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public ResponseEntity<byte[]> createProject(@RequestHeader final HttpHeaders headers, @Valid @RequestBody final Genhex4jDTO genhex4jDTO) {
+		
+		log.info("m=createProject, headers={}, genhex4jDTO={}", headers, genhex4jDTO);
 		
 		final LLMCredencials llmCredencials = headersToLLmCredencial(headers);
 		
